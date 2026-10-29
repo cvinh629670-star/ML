@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090d17">
+    <title>ML Lab — Học Machine Learning từ A đến Z</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #090d17;
+            --panel: #111827;
+            --panel-soft: #151f30;
+            --line: #253247;
+            --text: #edf3ff;
+            --muted: #92a2ba;
+            --accent: #68e0c0;
+            --accent-2: #8aa7ff;
+            --yellow: #ffd27a;
+            --danger: #ff8585;
+            --sidebar: 248px;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; color: var(--text); background: var(--bg); }
+        button, input { font: inherit; }
+        button { color: inherit; }
+        a { color: inherit; }
+        .app { min-height: 100vh; }
+        .sidebar {
+            position: fixed; inset: 0 auto 0 0; z-index: 10; width: var(--sidebar);
+            display: flex; flex-direction: column; padding: 22px 16px;
+            background: #0c1220; border-right: 1px solid var(--line);
+        }
+        .brand { display: flex; align-items: center; gap: 11px; padding: 0 8px 24px; }
+        .brand-mark { display:grid; place-items:center; width:39px; height:39px; border-radius:13px; color:#061510; background:var(--accent); font-weight:900; }
+        .brand strong { display:block; font-size:15px; letter-spacing:.04em; }
+        .brand small { color:var(--muted); font-size:11px; }
+        .side-label { margin: 16px 8px 8px; color:#71819a; font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+        .nav-list { display:grid; gap:4px; }
+        .nav-link, .module-link {
+            display:flex; align-items:center; gap:10px; width:100%; padding:10px 11px;
+            border:0; border-radius:10px; color:var(--muted); background:transparent;
+            text-align:left; text-decoration:none; cursor:pointer; font-size:13px;
+        }
+        .nav-link:hover, .module-link:hover, .nav-link.active { color:var(--text); background:var(--panel-soft); }
+        .nav-link.active { box-shadow:inset 2px 0 var(--accent); }
+        .nav-icon { width:20px; text-align:center; color:var(--accent); }
+        .module-nav { overflow:auto; padding-right:3px; }
+        .module-link { gap:9px; padding:8px 9px; font-size:12px; }
+        .module-link .module-num { flex:none; width:24px; color:#71819a; font-family:ui-monospace, monospace; font-size:10px; }
+        .module-link .module-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .module-link.done .module-num { color:var(--accent); }
+        .side-bottom { margin-top:auto; padding:14px 8px 0; border-top:1px solid var(--line); }
+        .side-bottom p { margin:0 0 10px; color:var(--muted); font-size:11px; line-height:1.6; }
+        .book-link { display:flex; align-items:center; gap:8px; color:var(--accent); font-size:12px; font-weight:700; text-decoration:none; }
+        .main { min-height:100vh; margin-left:var(--sidebar); }
+        .topbar {
+            position:sticky; top:0; z-index:5; display:flex; align-items:center; justify-content:space-between;
+            min-height:62px; padding:0 34px; background:rgba(9,13,23,.9); border-bottom:1px solid var(--line); backdrop-filter:blur(16px);
+        }
+        .crumb { color:var(--muted); font-size:12px; }
+        .top-actions { display:flex; align-items:center; gap:12px; }
+        .progress-mini { color:var(--muted); font-size:11px; }
+        .progress-mini strong { color:var(--accent); }
+        .icon-btn, .sidebar-toggle {
+            display:grid; place-items:center; width:34px; height:34px; border:1px solid var(--line);
+            border-radius:10px; background:var(--panel); cursor:pointer;
+        }
+        .sidebar-toggle { flex:none; }
+        .content { max-width:1200px; margin:auto; padding:34px; }
+        .module-page { max-width:900px; }
+        .module-page[hidden] { display:none; }
+        .module-page-head { margin-bottom:18px; }
+        .module-page-head .btn { margin-bottom:20px; }
+        .module-page-head h1 { margin:8px 0 5px; }
+        .module-page-head p { margin:0; color:var(--muted); font-size:12px; line-height:1.7; }
+        .sidebar-hidden .sidebar { transform:translateX(-100%); }
+        .sidebar-hidden .main { margin-left:0; }
+        .hero {
+            position:relative; overflow:hidden; padding:32px; border:1px solid #26374a; border-radius:22px;
+            background:radial-gradient(ellipse at 86% 20%,rgba(104,224,192,.14),transparent 35%),linear-gradient(135deg,#121d2a,#111827 62%,#151b30);
+        }
+        .hero:after { position:absolute; right:7%; top:25px; content:"∑"; color:rgba(104,224,192,.12); font:900 150px/1 Georgia,serif; }
+        .eyebrow { color:var(--accent); font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+        h1 { max-width:690px; margin:12px 0; font-size:clamp(27px,4vw,43px); line-height:1.13; letter-spacing:-.035em; }
+        .hero-copy { max-width:650px; color:#aab8cc; font-size:14px; line-height:1.8; }
+        .hero-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 15px; border:1px solid var(--line); border-radius:10px; background:var(--panel-soft); font-size:12px; font-weight:750; text-decoration:none; cursor:pointer; }
+        .btn:hover { filter:brightness(1.12); }
+        .btn-primary { color:#071610; border-color:var(--accent); background:var(--accent); }
+        .btn-quiet { color:#c8d4e6; background:rgba(15,24,37,.7); }
+        .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:18px 0 30px; }
+        .stat { padding:16px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+        .stat-label { color:var(--muted); font-size:10px; font-weight:700; }
+        .stat-value { margin-top:7px; font-size:22px; font-weight:850; letter-spacing:-.03em; }
+        .stat-value small { color:var(--muted); font-size:11px; font-weight:600; letter-spacing:0; }
+        .section-head { display:flex; align-items:end; justify-content:space-between; gap:14px; margin:0 0 14px; }
+        .section-head h2 { margin:0; font-size:20px; letter-spacing:-.02em; }
+        .section-head p { margin:5px 0 0; color:var(--muted); font-size:11px; }
+        .search { width:min(100%,250px); padding:10px 12px; border:1px solid var(--line); border-radius:10px; outline:none; color:var(--text); background:var(--panel); font-size:12px; }
+        .search:focus { border-color:var(--accent); }
+        .filters { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:15px; }
+        .filter-btn { padding:7px 11px; border:1px solid var(--line); border-radius:20px; color:var(--muted); background:transparent; font-size:10px; font-weight:750; cursor:pointer; }
+        .filter-btn.active { color:#0a1514; border-color:var(--accent); background:var(--accent); }
+        .course-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+        .course-card {
+            display:flex; flex-direction:column; min-height:210px; padding:17px; border:1px solid var(--line);
+            border-radius:15px; background:var(--panel); transition:transform .16s,border-color .16s;
+        }
+        .course-card:hover { transform:translateY(-2px); border-color:#42556f; }
+        .card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+        .tag { padding:4px 8px; border:1px solid #29463f; border-radius:20px; color:var(--accent); background:#142620; font-size:9px; font-weight:800; }
+        .card-num { color:#70819a; font:11px ui-monospace,monospace; }
+        .course-card h3 { margin:13px 0 7px; font-size:15px; }
+        .course-card p { margin:0; color:var(--muted); font-size:11px; line-height:1.7; }
+        .card-bottom { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto; padding-top:17px; }
+        .lesson-count { color:#8291a8; font-size:10px; }
+        .card-progress { width:100%; height:3px; margin-top:11px; overflow:hidden; border-radius:4px; background:#253247; }
+        .card-progress span { display:block; height:100%; background:var(--accent); }
+        .open-module { padding:6px 9px; border:1px solid var(--line); border-radius:8px; color:#c7d5e9; background:#151f30; font-size:10px; font-weight:700; cursor:pointer; }
+        .empty-state { grid-column:1/-1; padding:38px; border:1px dashed var(--line); border-radius:14px; color:var(--muted); text-align:center; font-size:12px; }
+        .concept-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:28px; }
+        .concept { padding:15px; border:1px solid var(--line); border-radius:13px; background:#0e1522; }
+        .concept b { display:block; margin-bottom:5px; color:var(--accent-2); font-size:11px; }
+        .concept span { color:var(--muted); font-size:10px; line-height:1.7; }
+        .learning-section { margin-top:34px; }
+        .core-concept-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+        .core-concept { position:relative; padding:15px; border:1px solid var(--line); border-radius:13px; background:var(--panel); transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease; }
+        .core-concept:hover { z-index:1; transform:scale(1.035); border-color:var(--accent); background:var(--panel-soft); box-shadow:0 10px 28px rgba(0,0,0,.24),0 0 16px rgba(104,224,192,.12); }
+        .core-concept h3 { margin:0 0 7px; color:var(--accent-2); font-size:13px; }
+        .core-concept p { margin:0; color:var(--muted); font-size:11px; line-height:1.75; }
+        .core-concept p + p { margin-top:8px; padding-top:8px; border-top:1px solid var(--line); }
+        .core-concept p strong { color:var(--accent); }
+        .quiz-layout { display:grid; grid-template-columns:minmax(210px,260px) minmax(0,1fr); align-items:start; gap:14px; }
+        .quiz-sidebar { display:grid; gap:10px; }
+        .quiz-topics, .quiz-progress, .quiz-card { border:1px solid var(--line); border-radius:16px; background:var(--panel); }
+        .quiz-topics { display:grid; gap:5px; padding:12px; }
+        .quiz-topic { display:flex; align-items:center; gap:9px; padding:10px; border:0; border-radius:9px; color:var(--muted); background:transparent; text-align:left; cursor:pointer; }
+        .quiz-topic:hover, .quiz-topic[aria-pressed="true"] { color:var(--text); background:var(--panel-soft); }
+        .quiz-topic[aria-pressed="true"] { box-shadow:inset 2px 0 var(--accent); }
+        .quiz-topic-name { flex:1; font-size:11px; font-weight:700; line-height:1.4; }
+        .quiz-topic-count { flex:none; color:var(--muted); font-size:9px; }
+        .quiz-topic-icon { width:20px; color:var(--accent); text-align:center; }
+        .quiz-progress { padding:13px; }
+        .quiz-progress-head { display:flex; justify-content:space-between; gap:8px; margin-bottom:9px; font-size:10px; }
+        .quiz-progress-head span, .quiz-score { color:var(--muted); }
+        .quiz-progress-track { height:5px; overflow:hidden; border-radius:9px; background:var(--panel-soft); }
+        .quiz-progress-fill { width:0; height:100%; border-radius:inherit; background:var(--accent); transition:width .2s; }
+        .quiz-score { margin:8px 0 0; font-size:9px; }
+        .quiz-card { min-height:440px; padding:22px; }
+        .quiz-topline { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+        .quiz-position { color:var(--muted); font-size:11px; }
+        .quiz-position strong { color:var(--text); }
+        .quiz-topic-pill { padding:6px 10px; border-radius:20px; color:var(--accent); background:var(--panel-soft); font-size:9px; font-weight:700; }
+        .quiz-question-area { padding:20px 0 10px; }
+        .quiz-question-kicker { margin:0 0 8px; color:var(--accent); font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+        .quiz-question-text { margin:0; font-size:clamp(16px,2vw,21px); line-height:1.55; }
+        .quiz-answer-list { display:grid; gap:8px; margin-top:12px; }
+        .quiz-answer-option { display:flex; width:100%; align-items:center; gap:10px; min-height:49px; padding:9px 11px; border:1px solid var(--line); border-radius:11px; color:var(--text); background:var(--panel-soft); text-align:left; cursor:pointer; transition:transform .15s,border-color .15s,background .15s; }
+        .quiz-answer-option:hover:not(:disabled) { transform:translateY(-1px); border-color:var(--accent); }
+        .quiz-answer-option:disabled { cursor:default; }
+        .quiz-answer-letter { display:grid; width:27px; height:27px; flex:none; place-items:center; border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:10px; font-weight:800; }
+        .quiz-answer-text { flex:1; font-size:11px; line-height:1.55; }
+        .quiz-answer-check { display:none; color:var(--accent); }
+        .quiz-answer-option.is-correct { border-color:var(--accent); color:var(--accent); }
+        .quiz-answer-option.is-correct .quiz-answer-letter { border-color:var(--accent); }
+        .quiz-answer-option.is-correct .quiz-answer-check { display:block; }
+        .quiz-answer-option.is-wrong { border-color:var(--danger); color:var(--danger); }
+        .quiz-answer-option.is-wrong .quiz-answer-letter { border-color:var(--danger); }
+        .quiz-feedback { display:none; margin-top:12px; padding:11px 13px; border-radius:10px; font-size:10px; line-height:1.6; }
+        .quiz-feedback.visible { display:block; }
+        .quiz-feedback.good { color:#c8ffea; background:#12241d; }
+        .quiz-feedback.needs-work { color:#ffd9d4; background:#2a1718; }
+        .quiz-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:17px; padding-top:14px; border-top:1px solid var(--line); }
+        .quiz-footer-note { color:var(--muted); font-size:9px; }
+        .quiz-footer-actions { display:flex; gap:7px; }
+        .quiz-footer-actions .btn { padding:8px 10px; font-size:10px; }
+        .quiz-bottom-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; }
+        .quiz-dots { display:flex; max-width:80%; flex-wrap:wrap; gap:4px; }
+        .quiz-dot { width:23px; height:23px; padding:0; border:1px solid transparent; border-radius:6px; color:var(--muted); background:var(--panel-soft); cursor:pointer; font-size:8px; }
+        .quiz-dot.current { border-color:var(--accent); color:#071610; background:var(--accent); }
+        .quiz-dot.answered:not(.current) { color:var(--accent); border-color:#315246; }
+        .quiz-reset { padding:5px 0; border:0; color:var(--muted); background:transparent; cursor:pointer; font-size:9px; }
+        .quiz-reset:hover { color:var(--danger); }
+        .quiz-results-backdrop { position:fixed; inset:0; z-index:35; display:none; place-items:center; padding:20px; background:#03060bcc; backdrop-filter:blur(4px); }
+        .quiz-results-backdrop.open { display:grid; }
+        .quiz-results { width:min(440px,100%); padding:25px; border:1px solid var(--line); border-radius:18px; background:var(--panel); box-shadow:0 25px 80px #0008; }
+        .quiz-results-icon { display:grid; width:42px; height:42px; place-items:center; border-radius:12px; color:var(--accent); background:var(--panel-soft); font-size:20px; }
+        .quiz-results h3 { margin:15px 0 6px; font-size:21px; }
+        .quiz-results-copy { margin:0; color:var(--muted); font-size:11px; line-height:1.6; }
+        .quiz-results-score { display:flex; align-items:baseline; gap:8px; margin:17px 0; }
+        .quiz-results-score strong { color:var(--accent); font-size:36px; }
+        .quiz-results-score span { color:var(--muted); font-size:10px; }
+        .quiz-results-breakdown { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:17px; }
+        .quiz-results-breakdown div { padding:10px; border-radius:10px; background:var(--panel-soft); }
+        .quiz-results-breakdown strong { display:block; font-size:18px; }
+        .quiz-results-breakdown span { color:var(--muted); font-size:9px; }
+        .quiz-results-actions { display:flex; gap:7px; }
+        .quiz-results-actions .btn { flex:1; padding:8px; font-size:10px; }
+        .hero-copy, .course-card p, .concept span, .lesson-body p, .lesson-body li, .module-page-head p, .core-concept p { cursor:text; }
+        ::highlight(hovered-sentence) { color:var(--text); background:rgba(104,224,192,.18); text-shadow:0 0 12px rgba(104,224,192,.32); }
+        body.light ::highlight(hovered-sentence) { background:rgba(8,126,102,.16); text-shadow:0 0 12px rgba(8,126,102,.22); }
+        .footer { margin-top:30px; padding:18px 0 6px; border-top:1px solid var(--line); color:#71819a; font-size:10px; line-height:1.7; }
+        .drawer-close { flex:none; width:34px; height:34px; border:1px solid var(--line); border-radius:10px; background:var(--panel); cursor:pointer; }
+        .outcomes { display:grid; gap:8px; margin:17px 0; padding:14px; border:1px solid #2a473f; border-radius:12px; background:#101d1a; }
+        .outcomes strong { color:var(--accent); font-size:11px; }
+        .outcomes span { color:#c1cfca; font-size:11px; }
+        .lesson-list { display:grid; gap:12px; }
+        .lesson { padding:16px; border:1px solid var(--line); border-radius:13px; background:var(--panel); }
+        .lesson-title { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+        .lesson-title h3 { margin:0; font-size:14px; }
+        .lesson-check { flex:none; padding:7px 9px; border:1px solid var(--line); border-radius:8px; color:var(--muted); background:#0b111c; font-size:10px; cursor:pointer; }
+        .lesson-check.done { color:#0b1713; border-color:var(--accent); background:var(--accent); }
+        .lesson-body { margin-top:12px; color:#b6c3d6; font-size:12px; line-height:1.85; }
+        .lesson-body p { margin:7px 0; }
+        .lesson-body ul { margin:7px 0; padding-left:20px; }
+        .lesson-body li { margin:4px 0; }
+        .lesson-body code, .code { padding:2px 5px; border-radius:5px; color:#a9f1d8; background:#0a111b; font:11px ui-monospace,monospace; }
+        .code-block { display:block; overflow:auto; margin:10px 0; padding:12px; border:1px solid var(--line); border-radius:9px; color:#c1eadc; background:#080d15; font:11px/1.7 ui-monospace,monospace; white-space:pre; }
+        .quiz { margin-top:16px; padding:16px; border:1px solid #3e3b2a; border-radius:13px; background:#1b1912; }
+        .quiz h3 { margin:0 0 10px; color:var(--yellow); font-size:13px; }
+        .quiz-q { margin:0 0 10px; font-size:12px; line-height:1.6; }
+        .quiz-options { display:grid; gap:7px; }
+        .quiz-option { padding:9px 11px; border:1px solid #373324; border-radius:8px; color:#c8c6bb; background:#13130f; text-align:left; font-size:11px; cursor:pointer; }
+        .quiz-option:hover { border-color:var(--yellow); }
+        .quiz-option.correct { border-color:var(--accent); color:var(--accent); }
+        .quiz-option.wrong { border-color:var(--danger); color:var(--danger); }
+        .quiz-feedback { min-height:17px; margin:9px 0 0; color:var(--muted); font-size:10px; }
+        .book-panel { display:none; position:fixed; inset:0; z-index:30; padding:3vh 3vw; background:#03060bf2; }
+        .book-panel.open { display:block; }
+        .book-box { display:flex; flex-direction:column; width:min(1100px,100%); height:94vh; margin:auto; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+        .book-toolbar { display:flex; align-items:center; justify-content:space-between; padding:0 2px 10px; color:var(--muted); font-size:12px; }
+        .book-box iframe { flex:1; width:100%; border:0; border-radius:8px; background:#fff; }
+        .toast { position:fixed; right:20px; bottom:20px; z-index:40; padding:12px 16px; border:1px solid #315246; border-radius:11px; color:#c8ffea; background:#12241d; box-shadow:0 8px 30px #0005; font-size:12px; opacity:0; transform:translateY(8px); transition:.2s; pointer-events:none; }
+        .toast.show { opacity:1; transform:translateY(0); }
+        body.light {
+            color-scheme:light; --bg:#f3f6fb; --panel:#fff; --panel-soft:#edf2f8; --line:#d8e0eb;
+            --text:#162238; --muted:#65738a; --accent:#087e66; --accent-2:#435ec1;
+        }
+        body.light .sidebar { background:#fff; }
+        body.light .topbar { background:#ffffffeb; }
+        body.light .hero { background:radial-gradient(ellipse at 86% 20%,#b1f0da80,transparent 35%),linear-gradient(135deg,#e8f3f3,#f4f6fb 65%,#edf0ff); }
+        body.light .hero-copy, body.light .lesson-body { color:#4f6078; }
+        body.light .concept, body.light .lesson, body.light .stat, body.light .course-card, body.light .core-concept { background:#fff; }
+        body.light .core-concept:hover { background:#f4fbf8; box-shadow:0 10px 28px rgba(25,53,42,.14),0 0 16px rgba(8,126,102,.14); }
+        body.light .lesson-check, body.light .quiz-option, body.light .code-block, body.light .search { color:#24344b; background:#f2f5fa; }
+        @media (max-width:1050px) { .course-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        @media (max-width:760px) {
+            :root { --sidebar:280px; }
+            .sidebar { transform:translateX(-100%); transition:transform .2s; box-shadow:15px 0 35px #0005; }
+            .sidebar.open { transform:translateX(0); }
+            .main { margin-left:0; }
+            .topbar { z-index:11; min-height:56px; padding:0 15px; }
+            .sidebar-toggle { margin-right:10px; }
+            .crumb { margin-right:auto; }
+            .content { padding:18px 15px 28px; }
+            .hero { padding:23px 19px; }
+            .hero:after { right:2%; top:20px; font-size:95px; }
+            .stats { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:12px 0 25px; }
+            .stat { padding:13px; }
+            .stat-value { font-size:19px; }
+            .section-head { align-items:flex-start; flex-direction:column; }
+            .search { width:100%; }
+            .course-grid { grid-template-columns:1fr; }
+            .course-card { min-height:185px; }
+            .concept-strip { grid-template-columns:1fr; }
+            .core-concept-grid { grid-template-columns:1fr; }
+            .quiz-layout { grid-template-columns:1fr; }
+            .quiz-topics { grid-template-columns:repeat(2,minmax(0,1fr)); max-height:240px; overflow:auto; }
+            .quiz-topic { align-items:flex-start; padding:8px; }
+            .quiz-topic-count { display:none; }
+            .quiz-card { padding:16px; }
+            .quiz-footer { align-items:flex-start; flex-direction:column; }
+            .quiz-footer-actions { width:100%; }
+            .quiz-footer-actions .btn { flex:1; }
+        }
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; } .core-concept:hover { transform:none; } }
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="brand"><div class="brand-mark">ML</div><div><strong>ML LAB</strong><small>Học máy, học có thực hành</small></div></div>
+        <div class="side-label">Không gian học</div>
+        <nav class="nav-list">
+            <a href="#home" class="nav-link active" onclick="showOverview()"><span class="nav-icon">⌂</span>Tổng quan</a>
+            <a href="#curriculum" class="nav-link" onclick="showOverview()"><span class="nav-icon">▤</span>Lộ trình học</a>
+            <a href="#core-concepts" class="nav-link" onclick="showOverview()"><span class="nav-icon">✳</span>Khái niệm cốt lõi</a>
+            <a href="#quizzes" class="nav-link" onclick="showOverview()"><span class="nav-icon">☑</span>Trắc nghiệm</a>
+            <button class="nav-link" type="button" onclick="openBook()"><span class="nav-icon">▣</span>Sách tham khảo</button>
+        </nav>
+        <div class="side-label">Chương trình</div>
+        <nav class="module-nav" id="module-nav" aria-label="Danh sách chương"></nav>
+        <div class="side-bottom">
+            <p>Tiến độ được lưu trên trình duyệt này. Học theo thứ tự hoặc chọn chủ đề muốn tìm hiểu.</p>
+            <a class="book-link" href="book_ML.pdf" target="_blank" rel="noopener">↗ Mở PDF Machine Learning</a>
+        </div>
+    </aside>
+
+    <main class="main" id="home">
+        <header class="topbar">
+            <button class="icon-btn sidebar-toggle" id="sidebar-toggle" type="button" onclick="toggleSidebar()" aria-label="Ẩn thanh công cụ bên trái" title="Ẩn thanh công cụ bên trái">☰</button>
+            <div class="crumb" id="breadcrumb">Học tập <span aria-hidden="true">/</span> Machine Learning</div>
+            <div class="top-actions"><div class="progress-mini"><strong id="top-progress">0%</strong> hoàn thành</div><button class="icon-btn" type="button" onclick="toggleTheme()" aria-label="Đổi giao diện" title="Đổi giao diện">◐</button></div>
+        </header>
+
+        <div class="content" id="overview-page">
+            <section class="hero">
+                <div class="eyebrow">Lộ trình học máy toàn diện</div>
+                <h1>Từ dữ liệu thô đến mô hình thông minh.</h1>
+                <p class="hero-copy">Học các nền tảng toán học, xử lý dữ liệu, thuật toán có giám sát và không giám sát, deep learning, NLP, triển khai và trách nhiệm AI — qua bài học ngắn, ví dụ và câu hỏi tự kiểm tra.</p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" type="button" onclick="openFirstIncomplete()">▶ Tiếp tục học</button>
+                    <button class="btn btn-quiet" type="button" onclick="openBook()">▣ Mở sách PDF tham khảo</button>
+                </div>
+            </section>
+
+            <section class="stats" aria-label="Thống kê học tập">
+                <div class="stat"><div class="stat-label">CHƯƠNG HỌC</div><div class="stat-value"><span id="module-stat">0</span><small> / <span id="module-total">0</span></small></div></div>
+                <div class="stat"><div class="stat-label">BÀI HỌC ĐÃ HOÀN THÀNH</div><div class="stat-value"><span id="lesson-stat">0</span><small> bài</small></div></div>
+                <div class="stat"><div class="stat-label">QUIZ ĐẠT</div><div class="stat-value"><span id="quiz-stat">0</span><small> / <span id="quiz-total">0</span></small></div></div>
+                <div class="stat"><div class="stat-label">TỔNG TIẾN ĐỘ</div><div class="stat-value"><span id="progress-stat">0</span><small>%</small></div></div>
+            </section>
+
+            <section id="curriculum">
+                <div class="section-head">
+                    <div><h2>Lộ trình học</h2><p><span id="curriculum-total">0</span> chương · bài học cô đọng · ví dụ thực tế · quiz tự kiểm tra</p></div>
+                    <input id="module-search" class="search" type="search" placeholder="Tìm thuật toán, chủ đề..." oninput="renderModules()" aria-label="Tìm chương học">
+                </div>
+                <div class="filters" id="filters"></div>
+                <div class="course-grid" id="course-grid"></div>
+            </section>
+
+            <section class="concept-strip" aria-label="Ba nguyên tắc thực hành">
+                <div class="concept"><b>01 · Chia dữ liệu đúng</b><span>Tách train, validation, test trước khi học mô hình. Không để dữ liệu tương lai rò rỉ vào quá trình huấn luyện.</span></div>
+                <div class="concept"><b>02 · Dùng baseline</b><span>Bắt đầu với quy tắc đơn giản hoặc mô hình tuyến tính. Chỉ thêm độ phức tạp khi kết quả đo lường chứng minh có ích.</span></div>
+                <div class="concept"><b>03 · Đánh giá theo mục tiêu</b><span>Chọn metric gắn với chi phí sai lầm trong bối cảnh thực tế; accuracy không phải lúc nào cũng phù hợp.</span></div>
+            </section>
+            <section class="learning-section" id="core-concepts" aria-labelledby="core-concepts-title">
+                <div class="section-head">
+                    <div><h2 id="core-concepts-title">Khái niệm cốt lõi</h2><p>Rê chuột lên một từ trong câu để làm nổi bật cả câu đó.</p></div>
+                </div>
+                <div class="core-concept-grid">
+                    <article class="core-concept"><h3>Overfitting · Quá khớp</h3><p>Mô hình học quá sát dữ liệu huấn luyện, kể cả nhiễu hoặc chi tiết ngẫu nhiên, nên điểm train tốt nhưng kết quả trên dữ liệu mới kém. Chênh lệch lớn giữa điểm train và validation là dấu hiệu thường gặp.</p><p><strong>Ví dụ:</strong> cây quyết định quá sâu có thể ghi nhớ từng mẫu train. Có thể thử giới hạn độ sâu, regularization, early stopping hoặc bổ sung dữ liệu phù hợp.</p></article>
+                    <article class="core-concept"><h3>Underfitting · Chưa khớp</h3><p>Mô hình chưa đủ khả năng nắm bắt quy luật của dữ liệu; lỗi thường cao cả trên train lẫn validation. Nguyên nhân có thể là mô hình quá đơn giản, đặc trưng chưa phù hợp hoặc quá trình học chưa hoàn tất.</p><p><strong>Ví dụ:</strong> dùng đường thẳng để mô tả quan hệ hình parabol có thể bỏ lỡ cấu trúc. Hãy xem learning curve và thử đặc trưng hoặc mô hình phù hợp hơn.</p></article>
+                    <article class="core-concept"><h3>Linear regression · Hồi quy tuyến tính</h3><p>Dự đoán giá trị liên tục bằng công thức ŷ = wᵀx + b, trong đó mỗi trọng số biểu thị mức đóng góp của một đặc trưng khi giữ các yếu tố khác cố định. Least squares thường chọn trọng số để giảm tổng bình phương phần dư.</p><p><strong>Ví dụ:</strong> ước lượng giá nhà từ diện tích và số phòng. Kiểm tra phần dư và giả định của mô hình; hệ số cho thấy liên hệ có điều kiện chứ không tự chứng minh quan hệ nhân quả.</p></article>
+                    <article class="core-concept"><h3>Logistic regression · Hồi quy logistic</h3><p>Mô hình phân loại ước lượng xác suất bằng cách đưa tổ hợp tuyến tính qua hàm sigmoid; với nhiều lớp có thể dùng dạng softmax. Chọn ngưỡng trên validation để đổi xác suất thành nhãn theo mục tiêu và chi phí sai lầm.</p><p><strong>Ví dụ:</strong> ước lượng xác suất một giao dịch là gian lận. Dù tên có chữ “hồi quy”, đây thường là mô hình phân loại; ngưỡng 0.5 không phải lựa chọn bắt buộc.</p></article>
+                    <article class="core-concept"><h3>Decision tree · Cây quyết định</h3><p>Cây đặt các câu hỏi về đặc trưng để chia dữ liệu thành những vùng; mỗi nút lá đưa ra dự đoán. Cây có thể mô tả bằng các luật dễ đọc, nhưng cấu trúc thay đổi đáng kể theo dữ liệu và cây sâu dễ quá khớp.</p><p><strong>Ví dụ:</strong> lần lượt hỏi diện tích lớn hơn ngưỡng nào, rồi xét vị trí để ước lượng giá nhà. Giới hạn độ sâu hoặc số mẫu mỗi lá để kiểm soát độ phức tạp.</p></article>
+                    <article class="core-concept"><h3>Random forest · Rừng ngẫu nhiên</h3><p>Huấn luyện nhiều cây trên các mẫu bootstrap và chọn ngẫu nhiên tập đặc trưng ở mỗi lần chia; sau đó tổng hợp dự đoán. Sự đa dạng giữa các cây thường giúp giảm variance so với một cây đơn.</p><p><strong>Ví dụ:</strong> phân loại khách hàng rời dịch vụ bằng cách lấy trung bình phiếu bầu từ nhiều cây. Rừng thường mạnh trên dữ liệu bảng, nhưng không tự động dễ diễn giải như một cây đơn.</p></article>
+                    <article class="core-concept"><h3>Gradient boosting</h3><p>Xây dựng một chuỗi mô hình nhỏ; mỗi bước bổ sung tập trung cải thiện phần sai của tổ hợp hiện tại theo hàm mất mát. Learning rate, số cây và độ sâu cần được chọn trên validation để cân bằng độ chính xác và overfitting.</p><p><strong>Ví dụ:</strong> mỗi cây mới hiệu chỉnh dự đoán giá nhà còn lệch ở một số vùng dữ liệu. Boosting thường hiệu quả với dữ liệu bảng nhưng cần theo dõi validation và dừng đúng lúc.</p></article>
+                    <article class="core-concept"><h3>Gradient descent · Hạ gradient</h3><p>Thuật toán tối ưu cập nhật tham số theo hướng giảm hàm mất mát: θ ← θ − η∇L(θ). Learning rate η quyết định độ dài bước; quá lớn có thể làm quá trình dao động, còn quá nhỏ khiến hội tụ chậm.</p><p><strong>Ví dụ:</strong> khi huấn luyện mô hình tuyến tính, gradient cho biết nên thay đổi trọng số theo hướng nào để giảm lỗi dự đoán trên batch hiện tại.</p></article>
+                    <article class="core-concept"><h3>Feature và label · Đặc trưng và nhãn</h3><p>Feature (đặc trưng) là đầu vào mô tả một mẫu; label (nhãn) là mục tiêu hoặc đáp án cần dự đoán trong học có giám sát. Chất lượng, thời điểm sẵn có và cách đo của đặc trưng đều quan trọng.</p><p><strong>Ví dụ:</strong> dự đoán giá nhà: diện tích và vị trí là feature, còn giá bán là label. Không dùng thông tin chỉ xuất hiện sau khi giao dịch nếu dự đoán cần thực hiện trước thời điểm đó.</p></article>
+                    <article class="core-concept"><h3>Train, validation và test</h3><p>Train dùng để fit mô hình và các bước tiền xử lý; validation hỗ trợ chọn mô hình, siêu tham số và ngưỡng. Test được giữ riêng để đánh giá cuối sau khi các quyết định đã chốt.</p><p><strong>Ví dụ:</strong> chia theo thời gian nếu cần dự báo tương lai, hoặc theo người dùng nếu nhiều dòng thuộc cùng người. Dùng test lặp đi lặp lại để chọn mô hình sẽ làm kết quả cuối kém khách quan.</p></article>
+                    <article class="core-concept"><h3>Regularization · Điều chuẩn</h3><p>Thêm ràng buộc hoặc penalty để hạn chế mô hình quá phức tạp và giảm overfitting. Ridge dùng penalty L2 để co nhỏ hệ số; Lasso dùng L1 và có thể đưa một số hệ số về 0.</p><p><strong>Ví dụ:</strong> tăng mức phạt có thể làm mô hình tuyến tính bớt nhạy với nhiễu, nhưng phạt quá mạnh gây underfitting. Chọn cường độ trên validation hoặc cross-validation.</p></article>
+                    <article class="core-concept"><h3>Data leakage · Rò rỉ dữ liệu</h3><p>Thông tin từ ngoài phạm vi được phép lọt vào huấn luyện hoặc đánh giá, khiến điểm số trông tốt giả tạo. Leakage có thể đến từ nhãn, thời gian, nhóm mẫu trùng nhau hoặc bước tiền xử lý fit trên cả test.</p><p><strong>Ví dụ:</strong> chuẩn hóa bằng trung bình của toàn bộ dữ liệu trước khi chia tập. Hãy fit biến đổi trong pipeline trên train của từng fold và chỉ dùng đặc trưng sẵn có tại thời điểm dự đoán.</p></article>
+                    <article class="core-concept"><h3>Cross-validation · Kiểm định chéo</h3><p>Chia phần train thành nhiều fold; mỗi lượt dùng một fold để validation và các fold còn lại để huấn luyện. Tổng hợp kết quả giúp ước lượng độ ổn định hơn một lần chia đơn lẻ.</p><p><strong>Ví dụ:</strong> 5-fold CV huấn luyện và đánh giá 5 lượt trên các phần khác nhau. Dữ liệu thời gian cần chia theo thời gian; dữ liệu theo nhóm cần giữ các mẫu cùng nhóm trong một fold. Vẫn giữ test riêng.</p></article>
+                    <article class="core-concept"><h3>Precision và recall</h3><p>Precision = TP/(TP+FP): trong các dự đoán dương tính, bao nhiêu là đúng. Recall = TP/(TP+FN): trong các trường hợp dương tính thật, mô hình phát hiện được bao nhiêu; hai metric thường đánh đổi khi đổi ngưỡng.</p><p><strong>Ví dụ:</strong> lọc thư rác: precision cao giảm thư thường bị đánh dấu nhầm, recall cao giúp bỏ sót ít thư rác. Chọn metric theo hậu quả của từng loại lỗi.</p></article>
+                    <article class="core-concept"><h3>Clustering và PCA</h3><p>Clustering (phân cụm) tìm các nhóm tương tự mà không cần nhãn sẵn; PCA (phân tích thành phần chính) chiếu dữ liệu đã center lên các hướng có phương sai lớn để giảm số chiều. Đây là hai mục tiêu khác nhau: nhóm dữ liệu và nén/biểu diễn dữ liệu.</p><p><strong>Ví dụ:</strong> K-means nhóm hồ sơ khách hàng theo đặc trưng; PCA có thể nén các biến trước khi trực quan hóa. Cần scale khi thang đo khác nhau và nhớ rằng cụm hoặc phương sai lớn không tự chứng minh ý nghĩa nghiệp vụ hay giá trị dự đoán.</p></article>
+                </div>
+            </section>
+            <section class="learning-section" id="quizzes" aria-labelledby="quizzes-title">
+                <div class="section-head">
+                    <div><h2 id="quizzes-title">Ngân hàng 115 câu trắc nghiệm</h2><p>100 câu mới cùng 15 câu tự kiểm tra hiện có. Chọn chương, trả lời từng câu và xem giải thích ngay.</p></div>
+                </div>
+                <div class="quiz-layout">
+                    <aside class="quiz-sidebar">
+                        <nav class="quiz-topics" id="quiz-topics" aria-label="Chọn chương trắc nghiệm"></nav>
+                        <section class="quiz-progress" aria-label="Tiến độ trắc nghiệm">
+                            <div class="quiz-progress-head"><strong>Tiến độ học</strong><span id="quiz-progress-label">0 / 115</span></div>
+                            <div class="quiz-progress-track" id="quiz-progress-track" role="progressbar" aria-label="Tiến độ làm trắc nghiệm" aria-valuemin="0" aria-valuemax="115" aria-valuenow="0">
+                                <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+                            </div>
+                            <p class="quiz-score">Tỷ lệ đúng: <strong id="quiz-score">0%</strong></p>
+                        </section>
+                    </aside>
+                    <section class="quiz-card" aria-label="Câu hỏi trắc nghiệm">
+                        <div class="quiz-topline">
+                            <span class="quiz-position">Câu <strong id="quiz-number">01</strong> <span id="quiz-total-position">/ 115</span></span>
+                            <span class="quiz-topic-pill" id="quiz-topic-pill"></span>
+                        </div>
+                        <div class="quiz-question-area">
+                            <p class="quiz-question-kicker" id="quiz-question-kicker"></p>
+                            <h3 class="quiz-question-text" id="quiz-question-text" tabindex="-1"></h3>
+                        </div>
+                        <div class="quiz-answer-list" id="quiz-answer-list" role="group" aria-label="Các phương án trả lời"></div>
+                        <div class="quiz-feedback" id="quiz-feedback" role="status" aria-live="polite"></div>
+                        <div class="quiz-footer">
+                            <span class="quiz-footer-note">Chọn một đáp án để xem giải thích</span>
+                            <div class="quiz-footer-actions">
+                                <button class="btn" id="quiz-prev" type="button">← Câu trước</button>
+                                <button class="btn btn-primary" id="quiz-next" type="button">Câu tiếp →</button>
+                                <button class="btn btn-quiet" id="quiz-results-button" type="button">Xem kết quả</button>
+                            </div>
+                        </div>
+                        <div class="quiz-bottom-row">
+                            <div class="quiz-dots" id="quiz-dots" aria-label="Đi đến câu hỏi"></div>
+                            <button class="quiz-reset" id="quiz-reset" type="button">Bắt đầu lại</button>
+                        </div>
+                    </section>
+                </div>
+            </section>
+            <footer class="footer">Nội dung bài học trong trang là phần giải thích và ví dụ được biên soạn mới để học tập; không sao chép nội dung sách. Dùng nút “Sách tham khảo” để mở PDF bạn đã cung cấp. Lưu tiến độ chỉ trên thiết bị/trình duyệt hiện tại.</footer>
+        </div>
+        <section class="content module-page" id="module-page" hidden aria-labelledby="module-title">
+            <header class="module-page-head">
+                <button class="btn btn-quiet" type="button" onclick="showOverview()">← Quay lại lộ trình</button>
+                <div class="eyebrow" id="module-eyebrow"></div>
+                <h1 id="module-title"></h1>
+                <p id="module-summary"></p>
+            </header>
+            <div class="outcomes" id="module-outcomes"></div>
+            <div class="lesson-list" id="module-lessons"></div>
+            <div class="quiz" id="module-quiz"></div>
+        </section>
+    </main>
+</div>
+
+<div class="book-panel" id="book-panel" role="dialog" aria-modal="true" aria-label="Sách Machine Learning">
+    <div class="book-box">
+        <div class="book-toolbar"><span>PDF tham khảo · book_ML.pdf</span><div><a class="btn" href="book_ML.pdf" target="_blank" rel="noopener">Mở tab riêng ↗</a> <button class="drawer-close" type="button" onclick="closeBook()" aria-label="Đóng sách">✕</button></div></div>
+        <iframe src="book_ML.pdf" title="Sách Machine Learning PDF"></iframe>
+    </div>
+</div>
+<div class="quiz-results-backdrop" id="quiz-results-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-results-title">
+    <section class="quiz-results">
+        <div class="quiz-results-icon" aria-hidden="true">✓</div>
+        <h3 id="quiz-results-title">Kết quả ôn tập</h3>
+        <p class="quiz-results-copy" id="quiz-results-copy"></p>
+        <div class="quiz-results-score"><strong id="quiz-results-percent">0%</strong><span>tỷ lệ đúng trên câu đã xem</span></div>
+        <div class="quiz-results-breakdown">
+            <div><strong id="quiz-results-correct">0</strong><span>câu đúng</span></div>
+            <div><strong id="quiz-results-wrong">0</strong><span>câu sai</span></div>
+            <div><strong id="quiz-results-unanswered">0</strong><span>chưa làm</span></div>
+        </div>
+        <div class="quiz-results-actions">
+            <button class="btn" id="quiz-results-close" type="button">Tiếp tục ôn</button>
+            <button class="btn btn-primary" id="quiz-review-wrong" type="button">Ôn câu sai</button>
+        </div>
+    </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+    const modules = [
+        {
+            title: 'Tư duy Machine Learning', category: 'Nền tảng', time: '35 phút',
+            summary: 'ML là gì, khi nào nên dùng, các kiểu học và vòng đời một dự án.',
+            outcomes: ['Phân biệt AI, ML và deep learning.', 'Xác định bài toán, nhãn và tín hiệu dự đoán.', 'Lập baseline và chia dữ liệu ban đầu.'],
+            lessons: [
+                { title: '1. Máy học từ ví dụ như thế nào?', body: `<p><b>Machine Learning (ML)</b> xây dựng quy tắc dự đoán từ dữ liệu thay vì viết thủ công mọi trường hợp. Mô hình nhận đầu vào <code>X</code>, tạo dự đoán <code>ŷ</code>, rồi điều chỉnh tham số để giảm sai số trên ví dụ đã biết.</p><p>Ví dụ: thay vì viết hàng nghìn luật lọc thư rác, đưa email đã gắn nhãn “rác / không rác” cho thuật toán học các mẫu từ.</p><ul><li><b>AI</b> là phạm vi rộng về hệ thống thực hiện tác vụ thông minh.</li><li><b>ML</b> là một cách tiếp cận AI dựa trên học từ dữ liệu.</li><li><b>Deep learning</b> dùng mạng nơ-ron nhiều lớp; hữu ích với dữ liệu phức tạp nhưng thường đòi hỏi nhiều dữ liệu và tính toán.</li></ul>` },
+                { title: '2. Chọn đúng loại bài toán', body: `<p><b>Học có giám sát:</b> mỗi ví dụ có đáp án; dùng cho hồi quy (giá nhà) và phân loại (email rác). <b>Không giám sát:</b> chưa có nhãn; tìm cụm, cấu trúc hoặc biểu diễn tiềm ẩn. <b>Tăng cường:</b> tác tử chọn hành động và nhận thưởng theo thời gian.</p><p>Hãy viết rõ đơn vị dự đoán, thời điểm cần dự đoán, nhãn mục tiêu và hành động sẽ dựa vào kết quả. Nếu chưa biết ai sẽ dùng dự đoán để làm gì, bài toán thường chưa được xác định đủ.</p>` },
+                { title: '3. Vòng lặp dự án và baseline', body: `<p>Vòng lặp cơ bản: xác định mục tiêu → thu thập dữ liệu phù hợp → tách tập → xây baseline → huấn luyện → đánh giá → phân tích lỗi → triển khai và theo dõi.</p><p>Baseline có thể là dự đoán trung bình, lớp phổ biến nhất, hoặc một quy tắc nghiệp vụ. Nó giúp biết mô hình có thực sự tốt hơn cách đơn giản hay không. Đặt metric, giới hạn độ trễ và chi phí trước khi chọn thuật toán.</p>` }
+            ],
+            quiz: { q: 'Bạn có lịch sử giao dịch gắn nhãn “gian lận / hợp lệ” và muốn phân loại giao dịch mới. Đây là loại học nào?', options: ['Học có giám sát — phân loại', 'Học không giám sát — phân cụm', 'Học tăng cường', 'Giảm chiều PCA'], answer: 0, explain: 'Dữ liệu có nhãn mục tiêu đã biết; mô hình học để phân loại ví dụ mới.' }
+        },
+        {
+            title: 'Python và công cụ dữ liệu', category: 'Nền tảng', time: '50 phút',
+            summary: 'Môi trường làm việc, NumPy, pandas, trực quan hóa và quy trình notebook.',
+            outcomes: ['Tổ chức thí nghiệm có thể lặp lại.', 'Đọc, kiểm tra và biến đổi bảng dữ liệu.', 'Tính toán vector hóa bằng NumPy và pandas.'],
+            lessons: [
+                { title: '1. Bộ công cụ thực hành', body: `<p>Python phổ biến nhờ hệ sinh thái khoa học dữ liệu. Các thư viện thường gặp: <code>NumPy</code> cho mảng số, <code>pandas</code> cho bảng, <code>Matplotlib</code>/<code>Seaborn</code> cho biểu đồ, <code>scikit-learn</code> cho pipeline ML, và <code>PyTorch</code> hoặc <code>TensorFlow</code> cho deep learning.</p><p>Notebook thuận tiện cho khám phá, nhưng mã tạo dữ liệu và huấn luyện cuối cùng nên có thể chạy lại từ đầu, lưu phiên bản thư viện, hạt giống ngẫu nhiên và cấu hình.</p>` },
+                { title: '2. Bảng dữ liệu và NumPy', body: `<p>Mỗi dòng thường là một quan sát; mỗi cột là một đặc trưng hoặc nhãn. Với DataFrame <code>df</code>, bắt đầu bằng <code>df.shape</code>, <code>df.dtypes</code>, <code>df.isna().sum()</code> và thống kê mô tả. NumPy giúp thực hiện phép toán trên cả mảng, tránh vòng lặp Python không cần thiết.</p><pre class="code-block">X = df[[\"tuoi\", \"thu_nhap\"]].to_numpy()\ny = df[\"gia\"].to_numpy()\nprint(X.shape, y.shape)</pre><p>Giữ rõ tên cột và đơn vị đo; một mảng có đúng shape nhưng sai thứ tự đặc trưng vẫn có thể tạo dự đoán sai.</p>` },
+                { title: '3. Khám phá bằng biểu đồ', body: `<p>Histogram cho phân phối một biến; scatter plot cho quan hệ giữa hai biến; boxplot giúp thấy ngoại lệ; biểu đồ theo thời gian giúp phát hiện xu hướng và mùa vụ.</p><p>Kiểm tra kiểu dữ liệu, giá trị thiếu, trùng lặp, miền hợp lệ và phân phối mục tiêu. Khám phá dữ liệu là để đặt câu hỏi và tìm lỗi — không phải chọn đặc trưng bằng cách nhìn vào tập test.</p>` }
+            ],
+            quiz: { q: 'Đâu là cách kiểm tra nhanh số dòng/cột của DataFrame pandas?', options: ['df.shape', 'df.weights', 'df.predict()', 'df.gradient'], answer: 0, explain: 'df.shape trả về cặp (số dòng, số cột).' }
+        },
+        {
+            title: 'Toán học cho ML', category: 'Nền tảng', time: '60 phút',
+            summary: 'Vector, ma trận, đạo hàm, xác suất và thống kê thiết yếu để hiểu mô hình.',
+            outcomes: ['Đọc biểu diễn vector và ma trận.', 'Hiểu gradient là hướng thay đổi nhanh.', 'Diễn giải xác suất, kỳ vọng và phương sai.'],
+            lessons: [
+                { title: '1. Đại số tuyến tính vừa đủ', body: `<p>Một mẫu có <i>p</i> đặc trưng được biểu diễn như vector <code>x ∈ ℝᵖ</code>; gom nhiều mẫu thành ma trận <code>X ∈ ℝⁿˣᵖ</code>. Mô hình tuyến tính tính <code>Xw + b</code>. Phép nhân ma trận gộp nhiều tích vô hướng thành một phép tính hiệu quả.</p><p>Chuẩn L1/L2 đo độ lớn vector và xuất hiện trong regularization. Tích vô hướng biểu thị mức độ hai hướng tương đồng. Kích thước ma trận cần khớp: số cột X bằng số phần tử w.</p>` },
+                { title: '2. Hàm mất mát và gradient', body: `<p>Hàm mất mát <code>L(θ)</code> chấm mức độ dự đoán sai theo tham số θ. Đạo hàm cho biết thay đổi nhỏ của tham số làm mất mát biến đổi ra sao; gradient là vector các đạo hàm riêng.</p><p>Gradient descent cập nhật <code>θ ← θ − η∇L(θ)</code>. η là learning rate: quá lớn có thể nhảy qua cực tiểu; quá nhỏ khiến học chậm. Mất mát huấn luyện thấp chưa bảo đảm dự đoán tốt cho dữ liệu mới.</p>` },
+                { title: '3. Xác suất và thống kê', body: `<p>Xác suất mô tả bất định. Kỳ vọng là trung bình theo xác suất; phương sai đo mức phân tán. Mẫu dữ liệu chỉ là quan sát từ một quá trình rộng hơn, nên thống kê từ mẫu có độ bất định.</p><p>Phân biệt tương quan với quan hệ nhân quả. Một biến có thể dự đoán tốt nhưng không phải nguyên nhân. Với dữ liệu lệch lớp, accuracy có thể gây hiểu nhầm — ví dụ bộ phân loại luôn đoán lớp chiếm 99% đạt accuracy 99% nhưng bỏ sót toàn bộ lớp hiếm.</p>` }
+            ],
+            quiz: { q: 'Gradient descent cập nhật tham số theo hướng nào?', options: ['Ngược hướng gradient của mất mát', 'Cùng hướng gradient để tăng mất mát', 'Theo thứ tự chữ cái của đặc trưng', 'Theo thứ tự ngẫu nhiên của nhãn'], answer: 0, explain: 'Dấu trừ giúp giảm hàm mất mát cục bộ khi learning rate phù hợp.' }
+        },
+        {
+            title: 'Chuẩn bị và khám phá dữ liệu', category: 'Dữ liệu', time: '55 phút',
+            summary: 'Chia tập dữ liệu, xử lý thiếu, mã hóa biến, chuẩn hóa và ngăn rò rỉ dữ liệu.',
+            outcomes: ['Thiết lập train/validation/test đúng cách.', 'Chọn biến đổi cho đặc trưng số và phân loại.', 'Ngăn data leakage bằng pipeline.'],
+            lessons: [
+                { title: '1. Chia train, validation và test', body: `<p><b>Train</b> dùng để học tham số. <b>Validation</b> giúp chọn mô hình và siêu tham số. <b>Test</b> chỉ dùng đánh giá cuối cùng, sau khi quyết định đã xong.</p><p>Chọn cách chia phù hợp: stratify cho phân loại lệch lớp; chia theo thời gian cho dự báo tương lai; group split khi nhiều dòng thuộc cùng người dùng/bệnh nhân. Nếu cùng một thực thể xuất hiện ở train và test, điểm số có thể bị thổi phồng.</p>` },
+                { title: '2. Thiếu dữ liệu, biến phân loại và scale', body: `<p>Giá trị thiếu có thể được điền bằng median, mode hoặc chiến lược theo nghiệp vụ; thêm cờ “bị thiếu” khi bản thân sự thiếu có thông tin. Biến phân loại không có thứ tự thường cần one-hot encoding. Biến có thứ tự có thể dùng mã hóa thứ bậc nếu ý nghĩa khoảng cách hợp lý.</p><p>Chuẩn hóa giúp một số mô hình nhạy với thang đo (k-NN, SVM, hồi quy regularized). Fit bộ chuẩn hóa trên train rồi chỉ transform validation/test; không fit riêng trên toàn dữ liệu.</p>` },
+                { title: '3. Pipeline chống rò rỉ', body: `<p><b>Data leakage</b> xảy ra khi thông tin không sẵn có ở thời điểm dự đoán lọt vào huấn luyện/đánh giá. Ví dụ: điền thiếu bằng median tính từ toàn bộ dữ liệu, hoặc dùng cột được tạo sau khi sự kiện đã xảy ra.</p><p>Đóng gói imputer, encoder, scaler và mô hình trong một pipeline. Cross-validation khi đó fit từng bước tiền xử lý bên trong mỗi fold — cách này giúp đánh giá công bằng hơn và dễ tái sử dụng lúc triển khai.</p>` }
+            ],
+            quiz: { q: 'Bạn nên fit scaler bằng phần dữ liệu nào?', options: ['Train; sau đó transform validation và test', 'Gộp train và test trước để có nhiều dữ liệu', 'Fit riêng scaler trên từng mẫu test', 'Fit trên validation rồi áp dụng ngược lại cho train'], answer: 0, explain: 'Chỉ fit trên train để tránh làm lộ thông tin từ validation/test.' }
+        },
+        {
+            title: 'Hồi quy và mô hình tuyến tính', category: 'Có giám sát', time: '55 phút',
+            summary: 'Hồi quy tuyến tính, hàm mất mát, regularization và đánh giá dự đoán số.',
+            outcomes: ['Diễn giải hệ số mô hình tuyến tính.', 'Phân biệt MAE, MSE và RMSE.', 'Giải thích vai trò của Ridge và Lasso.'],
+            lessons: [
+                { title: '1. Hồi quy tuyến tính', body: `<p>Hồi quy tuyến tính dự đoán <code>ŷ = wᵀx + b</code>. Hệ số <code>wⱼ</code> mô tả thay đổi dự đoán khi đặc trưng j tăng một đơn vị, giữ các biến khác cố định — nhưng không tự chứng minh quan hệ nhân quả.</p><p>Least squares tìm hệ số làm nhỏ tổng bình phương phần dư. Kiểm tra biểu đồ phần dư để phát hiện phi tuyến, phương sai không đồng nhất hoặc quan sát có ảnh hưởng mạnh. Mã hóa và scale có thể đổi cách diễn giải của hệ số.</p>` },
+                { title: '2. Metric cho hồi quy', body: `<p><b>MAE</b> là sai số tuyệt đối trung bình, dễ diễn giải theo đơn vị đầu ra và ít nhạy với ngoại lệ hơn MSE. <b>MSE</b> bình phương sai số nên phạt mạnh lỗi lớn. <b>RMSE</b> căn MSE để quay về đơn vị ban đầu.</p><p>So sánh với baseline và dùng validation/test cùng đơn vị đo nghiệp vụ. R² đo mức biến thiên được giải thích so với baseline dự đoán trung bình; R² không phải phần trăm dự đoán đúng và có thể âm trên test.</p>` },
+                { title: '3. Regularization: Ridge và Lasso', body: `<p>Ridge thêm phạt L2 <code>λ∑wⱼ²</code>, co nhỏ các hệ số và thường giữ tất cả đặc trưng. Lasso thêm phạt L1 <code>λ∑|wⱼ|</code>, có thể đưa một số hệ số về 0.</p><p>λ điều khiển độ phức tạp: quá thấp dễ overfit; quá cao dễ underfit. Chọn λ bằng validation hoặc cross-validation; chuẩn hóa đặc trưng trước vì regularization phụ thuộc thang đo.</p>` }
+            ],
+            quiz: { q: 'Khi cần metric hồi quy dễ hiểu theo đơn vị tiền và ít bị vài ngoại lệ chi phối hơn MSE, lựa chọn nào hợp lý?', options: ['MAE', 'Accuracy', 'Recall', 'ROC-AUC'], answer: 0, explain: 'MAE giữ đơn vị của mục tiêu và không bình phương sai số.' }
+        },
+        {
+            title: 'Phân loại và đánh giá mô hình', category: 'Có giám sát', time: '65 phút',
+            summary: 'Logistic regression, ma trận nhầm lẫn, precision, recall, ROC và hiệu chỉnh ngưỡng.',
+            outcomes: ['Hiểu xác suất và ngưỡng phân loại.', 'Tính precision/recall/F1 từ confusion matrix.', 'Chọn metric theo chi phí lỗi.'],
+            lessons: [
+                { title: '1. Logistic regression và ngưỡng', body: `<p>Dù tên là regression, logistic regression là mô hình phân loại. Nó biến tổ hợp tuyến tính thành xác suất qua sigmoid: <code>p = 1/(1 + e⁻ᶻ)</code>. So sánh p với ngưỡng để gán lớp.</p><p>Ngưỡng 0.5 không phải luật bắt buộc. Hạ ngưỡng thường tăng recall và giảm precision; tăng ngưỡng thường làm điều ngược lại. Chọn ngưỡng trên validation theo chi phí bỏ sót, báo động giả và năng lực xử lý.</p>` },
+                { title: '2. Confusion matrix và metric', body: `<p>Confusion matrix gồm TP, FP, TN, FN. <b>Precision = TP/(TP+FP)</b>: trong số dự đoán dương tính, bao nhiêu là đúng. <b>Recall = TP/(TP+FN)</b>: trong số dương tính thật, mô hình tìm được bao nhiêu. <b>F1</b> là trung bình điều hòa precision và recall.</p><p>Accuracy = số dự đoán đúng / tổng mẫu. Khi lớp hiếm, accuracy có thể cao dù mô hình không phát hiện lớp quan trọng nào.</p>` },
+                { title: '3. ROC, PR và calibration', body: `<p>ROC-AUC đo khả năng xếp hạng dương cao hơn âm trên nhiều ngưỡng; PR-AUC hữu ích khi lớp dương rất hiếm. Metric xếp hạng tốt không đồng nghĩa xác suất được hiệu chỉnh tốt.</p><p>Mô hình calibrated nghĩa là trong các dự đoán khoảng 0.8, gần 80% thực sự đúng. Calibration quan trọng khi quyết định dựa vào xác suất hay so sánh rủi ro. Luôn báo cáo metric trên dữ liệu đại diện cho môi trường triển khai.</p>` }
+            ],
+            quiz: { q: 'Trong sàng lọc bệnh, nếu bỏ sót ca bệnh rất nguy hiểm, metric nào cần đặc biệt quan tâm?', options: ['Recall', 'Chỉ riêng accuracy', 'Số lượng tham số', 'Kích thước batch'], answer: 0, explain: 'Recall đo tỷ lệ ca dương tính thật được phát hiện.' }
+        },
+        {
+            title: 'Overfitting, validation và tuning', category: 'Có giám sát', time: '50 phút',
+            summary: 'Bias-variance, cross-validation, siêu tham số, learning curve và chọn mô hình đáng tin.',
+            outcomes: ['Chẩn đoán underfit/overfit.', 'Sử dụng cross-validation hợp lý.', 'Tối ưu siêu tham số mà không chạm test.'],
+            lessons: [
+                { title: '1. Bias, variance và generalization', body: `<p><b>Underfit</b>: mô hình quá đơn giản, sai cả train lẫn validation. <b>Overfit</b>: nhớ nhiễu train, train tốt nhưng validation kém. Mục tiêu là generalization — hiệu quả trên dữ liệu mới cùng phân phối mục tiêu.</p><p>Learning curve so sánh lỗi train và validation khi tăng số lượng dữ liệu. Khoảng cách lớn gợi ý variance cao; cả hai lỗi đều lớn gợi ý bias cao hoặc pipeline có vấn đề.</p>` },
+                { title: '2. Cross-validation', body: `<p>k-fold CV chia train thành k phần; mỗi lượt giữ lại một fold để validation và huấn luyện trên các fold còn lại. Trung bình kết quả cho cái nhìn ổn định hơn một lần chia ngẫu nhiên.</p><p>Cross-validation phải tôn trọng cấu trúc dữ liệu: dùng time-series split cho chuỗi thời gian, group split cho nhóm có liên hệ. Test độc lập vẫn cần giữ lại tới bước cuối để tránh “tối ưu vào test”.</p>` },
+                { title: '3. Tối ưu siêu tham số', body: `<p>Tham số học từ dữ liệu; siêu tham số do người học đặt, ví dụ độ sâu cây, λ regularization, số láng giềng k. Random search thường hiệu quả hơn grid search khi nhiều chiều và chỉ vài chiều có ảnh hưởng lớn.</p><p>Tối ưu nhiều cấu hình làm tăng nguy cơ overfit validation. Lưu seed, split, metric và cấu hình; kiểm tra tính hợp lý của kết quả trên một lần đánh giá cuối cùng chưa dùng để lựa chọn.</p>` }
+            ],
+            quiz: { q: 'Khi đánh giá mô hình dự báo tương lai từ chuỗi thời gian, cách chia nào thường phù hợp hơn?', options: ['Huấn luyện trên quá khứ, validation trên giai đoạn sau', 'Xáo trộn ngẫu nhiên mọi mốc thời gian', 'Đưa test vào từng fold để tuning', 'Dùng tương lai làm đặc trưng cho quá khứ'], answer: 0, explain: 'Thứ tự thời gian phải phản ánh hướng dự đoán thực tế.' }
+        },
+        {
+            title: 'Cây quyết định và ensemble', category: 'Có giám sát', time: '60 phút',
+            summary: 'Cây, random forest, bagging, gradient boosting và cách kiểm soát độ phức tạp.',
+            outcomes: ['Hiểu cách cây chia không gian đặc trưng.', 'Phân biệt bagging với boosting.', 'Diễn giải tầm quan trọng đặc trưng thận trọng.'],
+            lessons: [
+                { title: '1. Cây quyết định', body: `<p>Cây đặt câu hỏi dạng “đặc trưng A ≤ ngưỡng?” để chia dữ liệu thành các vùng. Lá dự đoán giá trị hoặc lớp. Cây sâu dễ diễn giải theo đường đi nhưng thường có variance cao và overfit.</p><p>Giới hạn độ sâu, số mẫu tối thiểu trong lá hoặc pruning để regularize. Phân chia không yêu cầu chuẩn hóa đặc trưng như một số mô hình khoảng cách.</p>` },
+                { title: '2. Random forest và bagging', body: `<p>Bagging huấn luyện nhiều mô hình trên mẫu bootstrap rồi tổng hợp dự đoán, giúp giảm variance. Random forest thêm ngẫu nhiên khi chọn tập đặc trưng cho mỗi lần chia; các cây ít tương quan hơn nên ensemble thường ổn định hơn một cây đơn lẻ.</p><p>Forest có thể cho feature importance, nhưng importance kiểu impurity có thiên lệch với biến nhiều mức. Permutation importance đo mức giảm điểm khi xáo trộn biến trên tập đánh giá; các biến tương quan cao vẫn cần được diễn giải cẩn trọng.</p>` },
+                { title: '3. Gradient boosting', body: `<p>Boosting xây mô hình tuần tự; mỗi cây nhỏ tập trung sửa phần sai của tổ hợp hiện tại. Gradient boosting hiện đại thường mạnh trên dữ liệu bảng có cấu trúc.</p><p>Độ sâu cây, learning rate, số cây và regularization phải được điều chỉnh trên validation. Learning rate thấp thường cần nhiều cây hơn. Dừng sớm khi validation không còn cải thiện giúp hạn chế overfit.</p>` }
+            ],
+            quiz: { q: 'Random forest giảm tương quan giữa các cây chủ yếu bằng cách nào?', options: ['Chỉ xét một tập con đặc trưng ngẫu nhiên tại mỗi lần chia', 'Ép tất cả cây có cấu trúc giống hệt nhau', 'Dùng nhãn test để chỉnh mỗi cây', 'Giữ cố định một cây duy nhất'], answer: 0, explain: 'Ngẫu nhiên hóa đặc trưng giúp các cây đa dạng hơn.' }
+        },
+        {
+            title: 'SVM, k-NN và học không giám sát', category: 'Mô hình', time: '65 phút',
+            summary: 'Mô hình dựa trên khoảng cách, margin, phân cụm và PCA.',
+            outcomes: ['Hiểu margin và kernel của SVM.', 'Nêu ảnh hưởng của scale với k-NN.', 'Đánh giá phân cụm và giảm chiều phù hợp.'],
+            lessons: [
+                { title: '1. k-NN và SVM', body: `<p><b>k-NN</b> dự đoán từ các láng giềng gần nhất; đơn giản nhưng nhạy với thang đo, số chiều cao và lựa chọn metric khoảng cách. Chuẩn hóa đặc trưng thường quan trọng.</p><p><b>SVM</b> tìm biên có margin lớn. Kernel cho phép mô tả biên phi tuyến qua một phép tương đồng mà không cần biểu diễn rõ trong không gian chiều cao. C và kernel ảnh hưởng độ phức tạp; cần scale và tune bằng validation.</p>` },
+                { title: '2. Phân cụm K-means và DBSCAN', body: `<p>K-means tối thiểu hóa khoảng cách bình phương trong cụm và cần chọn số cụm k. Nó nhạy với khởi tạo, scale và ngoại lệ; phù hợp hơn với cụm dạng tương đối tròn.</p><p>DBSCAN gom vùng dày đặc, có thể phát hiện nhiễu và không yêu cầu khai báo trước số cụm, nhưng nhạy với tham số mật độ và không lý tưởng khi mật độ cụm khác nhau nhiều. Cụm là cấu trúc toán học — không tự động là nhóm có ý nghĩa nghiệp vụ.</p>` },
+                { title: '3. PCA và giảm chiều', body: `<p>PCA xoay dữ liệu về các hướng phương sai lớn nhất rồi chiếu xuống số chiều thấp hơn. Trước PCA thường cần center và có thể scale. Chỉ fit PCA trên train để tránh leakage.</p><p>Phương sai được giữ lại không đồng nghĩa giữ lại tín hiệu dự đoán. Dùng PCA để nén, trực quan hóa hoặc làm giảm nhiễu; so sánh tác động tới mục tiêu downstream thay vì chỉ nhìn biểu đồ 2D.</p>` }
+            ],
+            quiz: { q: 'Vì sao cần scale dữ liệu trước k-NN khi một đặc trưng là tuổi còn một đặc trưng là thu nhập?', options: ['Để biến có giá trị lớn không lấn át khoảng cách', 'Để tăng số nhãn trong tập test', 'Vì k-NN chỉ nhận chuỗi ký tự', 'Để biến mọi khoảng cách thành 0'], answer: 0, explain: 'Khoảng cách bị chi phối bởi thang đo lớn nếu không chuẩn hóa.' }
+        },
+        {
+            title: 'Feature engineering và dữ liệu thực tế', category: 'Dữ liệu', time: '55 phút',
+            summary: 'Biến đổi đặc trưng, dữ liệu mất cân bằng, lựa chọn đặc trưng và kiểm tra chất lượng.',
+            outcomes: ['Thiết kế đặc trưng từ ngữ cảnh.', 'Xử lý mất cân bằng chỉ trên train.', 'Phát hiện leakage và thay đổi phân phối.'],
+            lessons: [
+                { title: '1. Tạo đặc trưng có ý nghĩa', body: `<p>Feature engineering chuyển dữ liệu thô thành tín hiệu phù hợp: trích xuất thứ trong tuần từ timestamp, tính thời gian kể từ lần hoạt động gần nhất, hoặc tổng hợp hành vi theo cửa sổ thời gian.</p><p>Đảm bảo đặc trưng tồn tại đúng tại thời điểm dự đoán; cửa sổ tổng hợp phải kết thúc trước thời điểm đó. So sánh với baseline và kiểm tra theo phân nhóm để tránh đặc trưng chỉ phản ánh quy trình ghi nhận.</p>` },
+                { title: '2. Mất cân bằng lớp và threshold', body: `<p>Khi lớp hiếm, dùng precision/recall, PR curve, confusion matrix và threshold theo chi phí. Có thể dùng class weight hoặc resampling — chỉ thực hiện bên trong train/fold, không trước khi tách dữ liệu.</p><p>Không nhân bản mẫu rồi để bản sao xuất hiện ở cả train và test. Báo cáo cả tỷ lệ lớp, số lượng false positive/false negative và khả năng xử lý của người dùng cuối.</p>` },
+                { title: '3. Chọn đặc trưng và drift', body: `<p>Chọn đặc trưng có thể giảm chi phí, cải thiện khả năng giải thích và giảm overfit. Đánh giá trên validation bằng quy trình nằm trong cross-validation. Tương quan đơn biến không thể thay thế đánh giá mô hình khi có tương tác.</p><p><b>Data drift</b> là thay đổi phân phối đầu vào; <b>concept drift</b> là thay đổi quan hệ giữa đầu vào và mục tiêu. Theo dõi chất lượng dữ liệu và kết quả khi có nhãn mới; drift là tín hiệu điều tra chứ không phải bằng chứng lỗi tự động.</p>` }
+            ],
+            quiz: { q: 'Nếu dùng oversampling để xử lý lớp hiếm, nên áp dụng ở đâu?', options: ['Chỉ trên tập train bên trong từng fold', 'Trên toàn bộ dữ liệu trước khi chia train/test', 'Chỉ trên tập test để cân bằng kết quả', 'Chỉ sau khi đã triển khai mô hình'], answer: 0, explain: 'Chỉ train được resample để giữ đánh giá validation/test trung thực.' }
+        },
+        {
+            title: 'Mạng nơ-ron và Deep Learning', category: 'Deep Learning', time: '70 phút',
+            summary: 'Neuron, activation, backpropagation, tối ưu hóa và điều chuẩn mạng.',
+            outcomes: ['Giải thích forward pass và backpropagation.', 'Hiểu activation và gradient.', 'Nhận biết overfit và các kỹ thuật điều chuẩn.'],
+            lessons: [
+                { title: '1. Neuron và tầng mạng', body: `<p>Một neuron tính tổ hợp tuyến tính <code>z = wᵀx + b</code> rồi qua hàm kích hoạt như ReLU. Nhiều tầng ghép lại biểu diễn quan hệ phức tạp. Không có phi tuyến giữa các tầng, chồng nhiều phép tuyến tính vẫn chỉ là phép tuyến tính.</p><p>Input layer biểu diễn đặc trưng; hidden layers học biểu diễn; output layer và loss phụ thuộc bài toán. Ví dụ phân loại nhiều lớp thường dùng logits với cross-entropy.</p>` },
+                { title: '2. Backpropagation và tối ưu', body: `<p>Forward pass tính dự đoán và loss. Backpropagation áp dụng quy tắc dây chuyền để tính đạo hàm loss theo từng tham số. Optimizer dùng gradient để cập nhật; SGD, momentum và Adam là các lựa chọn phổ biến.</p><p>Batch size, learning rate, khởi tạo và scale đầu vào ảnh hưởng quá trình học. Theo dõi loss train/validation; nếu loss thành NaN, kiểm tra learning rate, dữ liệu và các phép toán không ổn định.</p>` },
+                { title: '3. Điều chuẩn Deep Learning', body: `<p>Dropout tạm ngẫu nhiên bỏ một số activation khi train; weight decay phạt trọng số; data augmentation tạo biến thể hợp lý của mẫu; early stopping dừng khi validation không cải thiện.</p><p>Mạng lớn cần dữ liệu, tính toán và quy trình đánh giá nghiêm túc. Bắt đầu với mô hình đơn giản, dùng GPU khi cần, và lưu checkpoint/cấu hình để tái lập. Với dữ liệu bảng nhỏ, boosting thường là baseline cạnh tranh.</p>` }
+            ],
+            quiz: { q: 'Vai trò của hàm kích hoạt phi tuyến trong mạng nhiều tầng là gì?', options: ['Cho phép mô hình biểu diễn quan hệ phi tuyến', 'Tự động loại bỏ nhu cầu đánh giá', 'Bảo đảm không bao giờ overfit', 'Thay thế hoàn toàn dữ liệu huấn luyện'], answer: 0, explain: 'Phi tuyến giúp mạng sâu biểu diễn hàm phức tạp hơn phép biến đổi tuyến tính.' }
+        },
+        {
+            title: 'Computer Vision và xử lý chuỗi', category: 'Deep Learning', time: '55 phút',
+            summary: 'Ảnh, CNN, augmentation, dữ liệu tuần tự, chuỗi thời gian và kiến trúc attention.',
+            outcomes: ['Hiểu phép tích chập trên ảnh.', 'Tránh chia tập gây leakage giữa ảnh liên quan.', 'Chọn baseline cho chuỗi và thời gian.'],
+            lessons: [
+                { title: '1. Ảnh và CNN', body: `<p>Ảnh màu thường có dạng chiều cao × chiều rộng × kênh. Convolution dùng bộ lọc cục bộ chia sẻ trọng số trên vị trí, học cạnh và mẫu không gian hiệu quả hơn kết nối dày đặc thuần túy. Pooling hoặc stride giảm kích thước biểu diễn.</p><p>Augmentation như lật, crop hoặc đổi sáng chỉ hợp lệ nếu không đổi nhãn theo ý nghĩa bài toán. Ảnh cùng video/người chụp cần group split để tránh rò rỉ những khung gần giống sang test.</p>` },
+                { title: '2. Chuỗi thời gian và chuỗi sự kiện', body: `<p>Đặc trưng chuỗi có thứ tự; chia dữ liệu theo thời gian, không xáo trộn tương lai vào train. Baseline hữu ích gồm dự báo giá trị gần nhất, trung bình mùa vụ hoặc mô hình autoregressive đơn giản.</p><p>Dùng cửa sổ lịch sử để dự đoán tương lai, chỉ sử dụng thông tin sẵn có trước thời điểm dự báo. Phân biệt dự báo nhiều bước với dự báo một bước lặp đi lặp lại; sai số có thể tích lũy theo chân trời.</p>` },
+                { title: '3. RNN, attention và transformer', body: `<p>RNN xử lý tuần tự và duy trì trạng thái, nhưng chuỗi dài có thể khó huấn luyện do gradient. Attention cho phép mỗi vị trí kết hợp thông tin từ những vị trí liên quan; Transformer dựa mạnh vào self-attention và xử lý các token song song trong lúc train.</p><p>Độ dài ngữ cảnh, vị trí token, dữ liệu tiền huấn luyện và chi phí suy luận là các yếu tố thiết kế. Dùng mô hình lớn không thay thế được đánh giá chất lượng và rò rỉ dữ liệu.</p>` }
+            ],
+            quiz: { q: 'Khi chia dữ liệu để đánh giá mô hình dự báo doanh số tháng tới, phương án nào tránh nhìn trước tương lai?', options: ['Train trên thời gian sớm, đánh giá trên thời gian muộn hơn', 'Trộn ngẫu nhiên các ngày rồi chia', 'Fit chuẩn hóa trên toàn chuỗi trước khi chia', 'Dùng dữ liệu tương lai của tháng tới trong train'], answer: 0, explain: 'Đánh giá phải mô phỏng việc dự đoán các thời điểm tương lai.' }
+        },
+        {
+            title: 'NLP, embeddings và mô hình ngôn ngữ', category: 'Deep Learning', time: '65 phút',
+            summary: 'Tokenization, biểu diễn từ, Transformer, transfer learning và đánh giá NLP.',
+            outcomes: ['Phân biệt token với từ.', 'Giải thích embeddings và attention.', 'Thiết kế đánh giá NLP an toàn và đúng nhiệm vụ.'],
+            lessons: [
+                { title: '1. Từ văn bản đến token', body: `<p>Văn bản được chuẩn hóa và tách thành token; tokenizer theo subword có thể biểu diễn từ hiếm bằng các mảnh phổ biến. Mỗi token ánh xạ sang ID. Cắt chuỗi và padding giúp tạo batch, nhưng có thể làm mất thông tin.</p><p>Pipeline xử lý ngôn ngữ phụ thuộc mục tiêu: phân loại văn bản, tìm kiếm, nhận dạng thực thể hay sinh văn bản. Kiểm tra tiếng Việt có dấu, dấu câu, URL, tên riêng và văn bản đa ngôn ngữ.</p>` },
+                { title: '2. Embeddings và attention', body: `<p>Embedding ánh xạ ID token thành vector học được. Trong Transformer, self-attention tính mức liên quan giữa các vị trí để xây biểu diễn theo ngữ cảnh. Positional encoding/embedding cung cấp thông tin thứ tự.</p><p>Biểu diễn ngữ cảnh của cùng một từ thay đổi theo câu. Context window giới hạn lượng văn bản mô hình xử lý một lần; chia đoạn cần chú ý ngữ cảnh và ranh giới câu.</p>` },
+                { title: '3. Transfer learning và đánh giá', body: `<p>Transfer learning bắt đầu từ mô hình đã tiền huấn luyện rồi fine-tune cho tác vụ cụ thể, thường cần ít dữ liệu gắn nhãn hơn huấn luyện từ đầu. So sánh với baseline TF-IDF + mô hình tuyến tính; mô hình lớn không đảm bảo thắng trên dữ liệu nhỏ hoặc lệch miền.</p><p>Đánh giá theo lỗi thật sự quan trọng: F1 hoặc macro-F1 cho phân loại mất cân bằng; exact match/F1 theo span cho trích xuất; đánh giá con người và bộ kiểm thử có nguồn gốc rõ ràng cho sinh văn bản. Bảo vệ dữ liệu nhạy cảm và kiểm tra prompt injection nếu mô hình dùng nội dung không tin cậy.</p>` }
+            ],
+            quiz: { q: 'Vì sao subword tokenization hữu ích?', options: ['Có thể biểu diễn từ hiếm bằng các mảnh đã biết', 'Bảo đảm mô hình hiểu mọi ngôn ngữ hoàn hảo', 'Loại bỏ hoàn toàn nhu cầu có dữ liệu', 'Tự động dịch mọi văn bản sang cùng một ngôn ngữ'], answer: 0, explain: 'Mô hình có thể ghép các đơn vị con thay vì cần token riêng cho mọi từ.' }
+        },
+        {
+            title: 'Học tăng cường và ra quyết định', category: 'Nâng cao', time: '50 phút',
+            summary: 'Agent, state, action, reward, policy, exploration và rủi ro reward hacking.',
+            outcomes: ['Nêu thành phần của một bài toán RL.', 'Hiểu trade-off exploration/exploitation.', 'Nhận biết khó khăn khi dùng reward thực tế.'],
+            lessons: [
+                { title: '1. MDP và policy', body: `<p>Trong Reinforcement Learning, agent quan sát state, chọn action và nhận reward từ environment. Mục tiêu thường là tối đa hóa tổng reward chiết khấu qua thời gian. Policy ánh xạ trạng thái sang hành động.</p><p>Reward cần phản ánh mục tiêu thật; tín hiệu quá thưa khiến học khó. Mô hình thế giới thay đổi hoặc quan sát không đầy đủ khiến trạng thái thực có thể khác những gì agent nhìn thấy.</p>` },
+                { title: '2. Exploration và exploitation', body: `<p>Exploration thử hành động mới để học về môi trường; exploitation chọn hành động hiện có vẻ tốt nhất. Khai thác quá sớm dễ mắc kẹt; khám phá quá nhiều gây mất phần thưởng hoặc rủi ro.</p><p>Trong mô phỏng, thử nghiệm nhiều lần có thể rẻ. Trong đời thực, thí nghiệm ảnh hưởng người dùng, bệnh nhân hoặc thiết bị cần giới hạn, giám sát và cơ chế an toàn rõ ràng.</p>` },
+                { title: '3. Reward hacking và đánh giá', body: `<p>Agent tối ưu reward được định nghĩa, không nhất thiết tối ưu ý định con người. Reward hacking xảy ra khi hệ thống tìm cách đạt điểm số cao bằng lối tắt ngoài mong muốn.</p><p>Kiểm tra hành vi biên, giới hạn hành động, mô phỏng trước, dùng giám sát con người và xác nhận mục tiêu với các bên liên quan. RL không phải lựa chọn mặc định cho mọi bài toán quyết định; hãy xem xét contextual bandit hoặc mô hình có giám sát đơn giản hơn.</p>` }
+            ],
+            quiz: { q: 'Exploration trong RL chủ yếu có nghĩa là gì?', options: ['Thử hành động để thu thập thông tin về môi trường', 'Luôn chọn hành động hiện được cho là tốt nhất', 'Xóa reward để agent không thiên lệch', 'Chỉ đánh giá agent bằng tập test tĩnh'], answer: 0, explain: 'Exploration giúp agent tìm hiểu các lựa chọn và hậu quả chưa rõ.' }
+        },
+        {
+            title: 'Triển khai, MLOps và AI có trách nhiệm', category: 'Thực tế', time: '65 phút',
+            summary: 'Đưa mô hình vào sản phẩm, theo dõi, tái lập, bảo mật, công bằng và quản trị.',
+            outcomes: ['Đóng gói preprocessing cùng mô hình.', 'Theo dõi drift, độ trễ và chất lượng.', 'Đánh giá quyền riêng tư, công bằng và tác động xã hội.'],
+            lessons: [
+                { title: '1. Từ notebook đến sản phẩm', body: `<p>Đóng gói pipeline tiền xử lý cùng mô hình để train và inference dùng cùng một logic. Ghi lại phiên bản dữ liệu, mã, thư viện, cấu hình và artifact; cung cấp kiểm tra schema và xử lý lỗi đầu vào rõ ràng.</p><p>Bắt đầu bằng baseline đơn giản, thử offline trước, sau đó triển khai có giám sát và khả năng rollback. Đo độ trễ, throughput, chi phí, tỷ lệ lỗi và chất lượng nghiệp vụ.</p>` },
+                { title: '2. Giám sát và vòng đời mô hình', body: `<p>Theo dõi phân phối đầu vào, tỷ lệ giá trị thiếu, dự đoán, độ trễ và metric khi có nhãn trễ. Phân biệt thay đổi dữ liệu với suy giảm chất lượng thật; thiết lập ngưỡng cảnh báo dựa trên tác động.</p><p>Quyết định retrain cần dựa trên dữ liệu mới có chất lượng, đánh giá trên benchmark phù hợp và phê duyệt triển khai. Canary hoặc shadow deployment giúp so sánh hệ thống mới trước khi chuyển toàn bộ lưu lượng.</p>` },
+                { title: '3. Công bằng, quyền riêng tư và bảo mật', body: `<p>Đánh giá lỗi theo nhóm có liên quan, nhưng hãy hiểu định nghĩa fairness phù hợp bối cảnh và hệ quả đánh đổi. Kiểm tra đại diện dữ liệu, khả năng tiếp cận, giải thích và cơ chế khiếu nại/chuyển cho con người.</p><p>Thu thập tối thiểu dữ liệu cần thiết, hạn chế truy cập, xác định thời hạn lưu. Mô hình có thể ghi nhớ dữ liệu hoặc bị đầu độc; hệ thống sinh còn có thể tạo nội dung sai. Ghi rõ giới hạn, người chịu trách nhiệm, cách giám sát và quy trình dừng/rollback.</p>` }
+            ],
+            quiz: { q: 'Trước khi retrain mô hình vì phát hiện drift, bước nào quan trọng?', options: ['Xác nhận dữ liệu và đánh giá chất lượng trên benchmark phù hợp', 'Tự động triển khai mọi checkpoint mới', 'Xóa bộ test cũ rồi đánh giá trên train', 'Bỏ qua giám sát sau khi cập nhật'], answer: 0, explain: 'Drift là tín hiệu điều tra; cần xác nhận chất lượng và kiểm tra trước khi triển khai.' }
+        }
+    ];
+
+    const extraQuestions = [
+        { moduleIndex: 0, questions: [
+            ['Một mô hình dự đoán giá nhà từ diện tích và vị trí có nhãn giá cũ. Đây là dạng học nào?', ['Học có giám sát, hồi quy', 'Học không giám sát, phân cụm', 'Học tăng cường', 'Giảm chiều'], 0, 'Dữ liệu có nhãn giá và mục tiêu là giá trị liên tục nên đây là hồi quy có giám sát.'],
+            ['Muốn nhóm khách hàng khi chưa có nhãn nhóm, nên bắt đầu với hướng nào?', ['Phân loại có giám sát', 'Phân cụm không giám sát', 'Hồi quy tuyến tính', 'Học tăng cường'], 1, 'Phân cụm tìm cấu trúc nhóm từ dữ liệu chưa gắn nhãn.'],
+            ['Trong học tăng cường, tác tử nhận gì sau khi thực hiện hành động?', ['Nhãn đúng cho mọi hành động', 'Phần thưởng hoặc tín hiệu phản hồi từ môi trường', 'Một tập test mới', 'Hệ số hồi quy'], 1, 'Tác tử tương tác với môi trường và nhận phần thưởng để học chính sách hành động.'],
+            ['Mục tiêu dự đoán được gọi là gì trong bài toán học có giám sát?', ['Nhãn (label)', 'Siêu tham số', 'Fold', 'Embedding'], 0, 'Nhãn là đáp án mục tiêu mà mô hình học để dự đoán.'],
+            ['Vì sao nên xây baseline trước mô hình phức tạp?', ['Để tránh phải đánh giá mô hình', 'Để có mốc đơn giản so sánh giá trị thực của mô hình mới', 'Để dùng tập test trong huấn luyện', 'Để bảo đảm đạt độ chính xác tuyệt đối'], 1, 'Baseline giúp đo xem mô hình phức tạp có thực sự cải thiện so với cách đơn giản hay không.'],
+            ['Khả năng dự đoán tốt trên dữ liệu mới cùng bối cảnh được gọi là gì?', ['Generalization (khả năng tổng quát hóa)', 'Tokenization', 'Bootstrap', 'Vectorization'], 0, 'Generalization là khả năng áp dụng quy luật đã học cho những ví dụ chưa thấy.'],
+            ['Một mô hình chỉ có ích khi nào trong quy trình thực tế?', ['Khi có thể hỗ trợ quyết định và được đánh giá theo mục tiêu phù hợp', 'Khi có nhiều tham số nhất', 'Khi accuracy train đạt 100%', 'Khi không cần người dùng'], 0, 'Mô hình cần gắn với quyết định thực tế, metric và các ràng buộc triển khai.']
+        ] },
+        { moduleIndex: 1, questions: [
+            ['Trong DataFrame pandas, thuộc tính nào trả về số dòng và số cột?', ['df.shape', 'df.weights', 'df.predict()', 'df.labels'], 0, 'df.shape trả về bộ kích thước (số dòng, số cột).'],
+            ['Mục đích chính của vectorization trong NumPy là gì?', ['Thực hiện phép toán trên mảng hiệu quả mà không cần vòng lặp Python cho từng phần tử', 'Tự động tạo nhãn dữ liệu', 'Chia tập test thành fold', 'Xóa giá trị thiếu'], 0, 'Phép toán vector hóa tận dụng thao tác mảng tối ưu thay vì lặp thủ công từng phần tử.'],
+            ['Để kết quả thí nghiệm ngẫu nhiên có thể tái lập, nên làm gì?', ['Đặt seed và lưu cấu hình, phiên bản công cụ', 'Đổi dữ liệu ở mỗi lần chạy', 'Chỉ ghi lại điểm tốt nhất', 'Dùng test làm seed'], 0, 'Seed và cấu hình được ghi nhận giúp tái tạo các bước có yếu tố ngẫu nhiên.'],
+            ['Trong bảng dữ liệu thông thường, mỗi hàng đại diện cho gì?', ['Một quan sát hoặc mẫu', 'Một thuật toán', 'Một hàm mất mát', 'Một siêu tham số'], 0, 'Mỗi hàng thường là một quan sát, còn cột mô tả đặc trưng hoặc nhãn.'],
+            ['df.isna().sum() thường được dùng để kiểm tra điều gì?', ['Số giá trị thiếu ở mỗi cột', 'Số epoch tối ưu', 'Độ sâu cây', 'Số cụm tốt nhất'], 0, 'isna đánh dấu giá trị thiếu và sum đếm chúng theo cột.'],
+            ['Vì sao nên kiểm tra kiểu dữ liệu trước khi huấn luyện?', ['Để phát hiện cột bị đọc sai kiểu và chọn xử lý phù hợp', 'Để tự động loại bỏ tập validation', 'Để bảo đảm dữ liệu không có sai lệch', 'Để thay thế việc đánh giá'], 0, 'Kiểu dữ liệu sai có thể khiến phép biến đổi hoặc thuật toán xử lý dữ liệu không đúng.'],
+            ['Notebook phù hợp nhất với mục đích nào?', ['Khám phá và thử nghiệm tương tác, đồng thời vẫn cần mã có thể chạy lại', 'Lưu mật khẩu người dùng', 'Thay thế hoàn toàn quản lý phiên bản', 'Đảm bảo thí nghiệm luôn tái lập dù không lưu cấu hình'], 0, 'Notebook hỗ trợ khám phá nhưng cần tổ chức và ghi cấu hình để tái lập.']
+        ] },
+        { moduleIndex: 2, questions: [
+            ['Nếu X có 120 hàng và 5 cột đặc trưng, vector trọng số của mô hình tuyến tính thường có bao nhiêu phần tử?', ['5', '120', '125', '600'], 0, 'Mỗi đặc trưng cần một trọng số nên vector w có 5 phần tử.'],
+            ['Trong công thức gradient descent θ ← θ − η∇L(θ), η là gì?', ['Learning rate', 'Nhãn mục tiêu', 'Số fold', 'Phương sai'], 0, 'η điều khiển kích thước bước cập nhật tham số.'],
+            ['Nếu learning rate quá lớn, điều gì có thể xảy ra?', ['Các bước cập nhật vượt qua vùng tối ưu và quá trình học dao động hoặc phân kỳ', 'Mô hình chắc chắn không overfit', 'Mọi gradient trở thành 0', 'Tập dữ liệu tự cân bằng'], 0, 'Bước cập nhật quá lớn có thể khiến loss dao động hoặc tăng thay vì hội tụ.'],
+            ['Tích vô hướng của hai vector có cùng số chiều tạo ra kết quả gì?', ['Một số vô hướng', 'Một ma trận luôn vuông', 'Một nhãn phân loại', 'Một tập dữ liệu mới'], 0, 'Tích vô hướng nhân từng cặp phần tử tương ứng rồi cộng thành một số.'],
+            ['Phương sai mô tả điều gì?', ['Mức độ phân tán của các giá trị quanh trung bình', 'Tỷ lệ dự đoán đúng', 'Số lượng đặc trưng', 'Khoảng cách giữa train và test'], 0, 'Phương sai đo mức độ các quan sát phân tán quanh giá trị trung bình.'],
+            ['Nếu A có kích thước 10×4, B cần có dạng nào để phép nhân AB hợp lệ?', ['4×k với một số nguyên k', '10×k', 'k×10', '4×10'], 0, 'Số cột của A phải bằng số hàng của B, nên B cần 4 hàng.'],
+            ['Tương quan giữa hai biến cao chứng minh điều gì?', ['Hai biến có liên hệ thống kê trong dữ liệu, nhưng chưa đủ chứng minh nhân quả', 'Biến thứ nhất gây ra biến thứ hai', 'Mô hình chắc chắn tổng quát hóa tốt', 'Không có biến gây nhiễu'], 0, 'Tương quan không tự xác lập quan hệ nhân quả.']
+        ] },
+        { moduleIndex: 3, questions: [
+            ['Vì sao tập test nên được giữ riêng đến khi chốt mô hình?', ['Để ước lượng cuối cùng ít bị ảnh hưởng bởi quyết định chọn mô hình', 'Để tăng số fold huấn luyện', 'Để fit scaler riêng cho test', 'Để dùng nhãn test làm đặc trưng'], 0, 'Nếu lặp lại quyết định dựa trên test, kết quả test cũng bị dùng để tối ưu.'],
+            ['Khi cùng một bệnh nhân có nhiều dòng dữ liệu, cách chia nào giúp tránh rò rỉ giữa train và test?', ['Group split theo bệnh nhân', 'Chia ngẫu nhiên từng dòng độc lập', 'Chỉ sắp xếp theo tên cột', 'Fit trên toàn bộ rồi mới chia'], 0, 'Group split giữ các dòng cùng một thực thể trong cùng một phía của phép chia.'],
+            ['Với phân loại có lớp hiếm, stratified split giúp điều gì?', ['Giữ tỷ lệ lớp gần tương tự giữa các tập', 'Tạo thêm mẫu độc lập', 'Bảo đảm mọi dự đoán đều đúng', 'Loại bỏ nhu cầu tập test'], 0, 'Stratification duy trì phân bố lớp gần tương tự giữa các phần dữ liệu.'],
+            ['Khi điền giá trị thiếu bằng median, median nên được tính từ đâu?', ['Train, rồi áp dụng giá trị đó cho validation và test', 'Toàn bộ dữ liệu trước khi chia', 'Riêng từng hàng test', 'Chỉ từ nhãn mục tiêu'], 0, 'Tính thống kê trên train tránh để thông tin validation/test ảnh hưởng bước học tiền xử lý.'],
+            ['One-hot encoding thường phù hợp với loại biến nào?', ['Biến phân loại không có thứ tự tự nhiên', 'Nhãn số liên tục', 'Ảnh RGB', 'Cột thời gian luôn tăng'], 0, 'One-hot tạo cột chỉ báo riêng mà không áp đặt thứ tự giả giữa các nhóm.'],
+            ['Scaler cần được fit ở giai đoạn nào của mỗi fold cross-validation?', ['Trên phần train của fold đó', 'Một lần trên toàn bộ dữ liệu trước khi chia fold', 'Trên tập validation của fold', 'Trên nhãn test'], 0, 'Fit trong từng phần train ngăn thống kê validation lọt vào quy trình.'],
+            ['Pipeline tiền xử lý và mô hình giúp ích gì?', ['Đảm bảo các bước được fit đúng trong từng fold và tái sử dụng nhất quán lúc dự đoán', 'Tự chọn metric phù hợp cho mọi bài toán', 'Thay thế kiểm tra chất lượng dữ liệu', 'Làm cho mọi dữ liệu hoàn chỉnh'], 0, 'Pipeline gói các phép biến đổi và mô hình theo cùng thứ tự, giảm lỗi và leakage.']
+        ] },
+        { moduleIndex: 4, questions: [
+            ['Hồi quy tuyến tính dự đoán theo dạng cơ bản nào?', ['ŷ = wᵀx + b', 'ŷ = argmax softmax(x)', 'ŷ = số cụm của x', 'ŷ = phần thưởng tích lũy'], 0, 'Mô hình tuyến tính tạo dự đoán bằng tổ hợp có trọng số của đặc trưng cộng hệ số chệch.'],
+            ['Residual (phần dư) của một quan sát là gì?', ['Giá trị thật trừ giá trị dự đoán', 'Giá trị dự đoán chia số đặc trưng', 'Learning rate trừ loss', 'Số mẫu train trừ số mẫu test'], 0, 'Phần dư biểu diễn chênh lệch giữa mục tiêu quan sát được và dự đoán.'],
+            ['Đặc điểm nào đúng với MAE?', ['Tính trung bình trị tuyệt đối của sai số và giữ đơn vị của mục tiêu', 'Bình phương sai số rồi cộng', 'Đo tỷ lệ dương tính thật', 'Luôn nằm trong khoảng 0 đến 1'], 0, 'MAE tính trung bình |y − ŷ| nên dễ diễn giải cùng đơn vị với mục tiêu.'],
+            ['So với MAE, MSE thường phản ứng thế nào với sai số rất lớn?', ['Phạt mạnh hơn vì bình phương sai số', 'Bỏ qua sai số lớn', 'Chỉ tính số dự đoán đúng', 'Luôn nhỏ hơn MAE'], 0, 'Bình phương làm các sai số lớn có ảnh hưởng mạnh hơn tới MSE.'],
+            ['R² âm trên tập test có thể biểu thị điều gì?', ['Mô hình tệ hơn baseline luôn dự đoán trung bình trên tập đó', 'Mô hình đúng 100%', 'Không có sai số', 'Dữ liệu chắc chắn tuyến tính'], 0, 'R² âm cho biết sai số mô hình lớn hơn baseline trung bình theo định nghĩa metric.'],
+            ['Ridge regularization dùng loại phạt nào?', ['L2, tổng bình phương hệ số', 'L1, tổng trị tuyệt đối hệ số', 'Entropy của nhãn', 'Số lượng fold'], 0, 'Ridge thêm penalty L2 để co nhỏ hệ số.'],
+            ['Đặc tính thường gặp của Lasso là gì?', ['L1 có thể đưa một số hệ số về đúng 0', 'L2 luôn xóa toàn bộ đặc trưng', 'Không cần chọn lambda', 'Chỉ dùng cho phân cụm'], 0, 'Penalty L1 có thể tạo hệ số bằng 0, từ đó tạo tính thưa.']
+        ] },
+        { moduleIndex: 5, questions: [
+            ['Sigmoid trong logistic regression chuyển một giá trị thực thành gì?', ['Giá trị trong khoảng 0 đến 1 có thể diễn giải là xác suất ước lượng', 'Một vector trọng số', 'Một khoảng cách Euclid', 'Một nhãn luôn đúng'], 0, 'Sigmoid ánh xạ đầu vào thực sang khoảng (0,1).'],
+            ['Trong phân loại nhị phân, hạ ngưỡng dự đoán thường làm thay đổi ra sao?', ['Tăng số dự đoán dương, thường tăng recall và có thể giảm precision', 'Giảm mọi dự đoán dương', 'Không ảnh hưởng kết quả', 'Tự làm calibration hoàn hảo'], 0, 'Ngưỡng thấp hơn khiến nhiều mẫu được gán dương tính hơn.'],
+            ['False negative là trường hợp nào?', ['Mẫu dương tính thật bị dự đoán là âm tính', 'Mẫu âm tính thật bị dự đoán là dương tính', 'Mẫu dương tính dự đoán đúng', 'Mẫu âm tính dự đoán đúng'], 0, 'False negative là ca dương tính bị bỏ sót.'],
+            ['Precision được tính theo công thức nào?', ['TP/(TP+FP)', 'TP/(TP+FN)', 'TN/(TN+FP)', '(TP+TN)/N'], 0, 'Precision đo tỷ lệ dự đoán dương tính là đúng.'],
+            ['Recall tập trung đo điều gì?', ['Tỷ lệ các trường hợp dương tính thật được phát hiện', 'Tỷ lệ dự đoán âm tính là đúng', 'Số tham số mô hình', 'Tốc độ huấn luyện'], 0, 'Recall = TP/(TP+FN), đo mức bao phủ các ca dương tính.'],
+            ['Khi lớp dương tính rất hiếm, đường cong nào thường cung cấp góc nhìn hữu ích hơn về lớp dương?', ['Precision-recall curve', 'Biểu đồ loss train đơn lẻ', 'Histogram của chỉ số hàng', 'Đường cong learning rate'], 0, 'PR curve tập trung vào precision và recall của lớp dương, có ích khi lớp này hiếm.'],
+            ['Mô hình calibrated với xác suất 0.8 có nghĩa gần đúng gì?', ['Trong nhóm dự đoán khoảng 0.8, xấp xỉ 80% trường hợp xảy ra', 'Mọi dự đoán đều đúng', 'Recall luôn bằng 0.8', 'Ngưỡng tối ưu luôn là 0.8'], 0, 'Calibration so sánh xác suất dự đoán với tần suất thực tế tương ứng.']
+        ] },
+        { moduleIndex: 6, questions: [
+            ['Dấu hiệu thường gặp của overfitting là gì?', ['Điểm train tốt nhưng validation kém đáng kể', 'Cả train và validation đều không có mẫu', 'Train và validation luôn giống hệt nhau', 'Mô hình không có tham số'], 0, 'Khoảng cách hiệu năng lớn giữa train và validation thường gợi ý mô hình học cả nhiễu train.'],
+            ['Nếu lỗi train và validation đều cao, khả năng nào cần xem xét?', ['Underfitting hoặc đặc trưng/pipeline chưa phù hợp', 'Chắc chắn overfitting', 'Data leakage từ test là nguyên nhân duy nhất', 'Tập validation quá lớn'], 0, 'Cả hai lỗi cao thường gợi ý mô hình chưa đủ khả năng hoặc pipeline chưa phù hợp.'],
+            ['Trong k-fold cross-validation, mỗi mẫu train được dùng thế nào?', ['Lần lượt làm validation một fold và làm train trong các lượt khác', 'Chỉ dùng làm test một lần duy nhất', 'Luôn bị loại khỏi mọi lượt', 'Được nhân bản vào nhãn'], 0, 'Mỗi fold lần lượt được giữ lại để đánh giá, còn các fold khác huấn luyện.'],
+            ['Khi dữ liệu có thứ tự thời gian, vì sao không nên xáo trộn ngẫu nhiên để đánh giá dự báo tương lai?', ['Có thể cho mô hình học từ tương lai so với thời điểm validation', 'Vì mô hình không thể dùng số', 'Vì dữ liệu thời gian không có nhãn', 'Vì random split luôn tăng bias'], 0, 'Xáo trộn có thể phá vỡ thứ tự thực tế và gây leakage từ tương lai.'],
+            ['Khác biệt giữa tham số và siêu tham số là gì?', ['Tham số được học từ dữ liệu; siêu tham số được đặt/chọn bên ngoài quá trình fit', 'Tham số chỉ dùng cho test', 'Siêu tham số luôn là nhãn', 'Không có sự khác biệt'], 0, 'Ví dụ trọng số là tham số; độ sâu cây hoặc λ thường là siêu tham số.'],
+            ['Tại sao không nên chọn siêu tham số dựa liên tục vào tập test?', ['Vì sẽ biến test thành một phần của quá trình lựa chọn và làm lạc quan đánh giá cuối', 'Vì test không bao giờ có nhãn', 'Vì thuật toán không hỗ trợ test', 'Vì điều đó luôn làm train loss tăng'], 0, 'Dùng test để lựa chọn lặp lại gây overfit vào tập đánh giá cuối.'],
+            ['Nếu thêm dữ liệu train giúp validation cải thiện rõ, điều đó thường gợi ý gì?', ['Mô hình có thể hưởng lợi từ thêm dữ liệu và variance có thể đang đáng kể', 'Mô hình đã hoàn hảo', 'Metric không hợp lệ', 'Nhãn không cần thiết'], 0, 'Learning curve có thể chỉ ra mô hình còn hưởng lợi từ thêm dữ liệu.']
+        ] },
+        { moduleIndex: 7, questions: [
+            ['Cách chia dữ liệu cơ bản để mô phỏng dự báo thời gian là gì?', ['Train trên giai đoạn sớm, đánh giá trên giai đoạn muộn', 'Train trên tương lai và test trên quá khứ', 'Xáo trộn mọi mốc trước khi chia', 'Chỉ dùng một thời điểm'], 0, 'Thứ tự này mô phỏng việc dự đoán tương lai bằng dữ liệu quá khứ.'],
+            ['Seasonality (mùa vụ) trong chuỗi thời gian là gì?', ['Mẫu biến động lặp lại theo chu kỳ tương đối ổn định', 'Sai số luôn bằng 0', 'Một loại nhãn phân loại', 'Giá trị thiếu ngẫu nhiên'], 0, 'Mùa vụ là biến động có tính lặp lại theo chu kỳ như ngày, tuần hoặc năm.'],
+            ['Vì sao baseline “dự đoán bằng giá trị gần nhất” hữu ích cho chuỗi thời gian?', ['Tạo mốc đơn giản phản ánh tính liên tục theo thời gian', 'Loại bỏ mọi xu hướng', 'Tự tìm mùa vụ hoàn hảo', 'Thay thế tập test'], 0, 'Naive forecast cho phép so sánh mô hình phức tạp với dự đoán đơn giản nhưng thiết thực.'],
+            ['Cửa sổ dự báo 7 bước phía trước có nghĩa gì?', ['Dự đoán các thời điểm tiếp theo trong 7 bước', 'Dùng 7 đặc trưng bất kỳ', 'Chia dữ liệu thành 7 lớp', 'Huấn luyện 7 mô hình bắt buộc'], 0, 'Horizon xác định khoảng xa trong tương lai mà mô hình cần dự báo.'],
+            ['Khi đánh giá rolling forecast, phép thử thường làm gì?', ['Dịch điểm bắt đầu theo thời gian và đánh giá trên nhiều đoạn tương lai', 'Trộn ngẫu nhiên nhãn', 'Fit một scaler lên cả test tương lai', 'Xóa thứ tự thời gian'], 0, 'Đánh giá cuốn chiếu kiểm tra dự báo ở nhiều mốc thời gian khác nhau.'],
+            ['Một đặc trưng tổng hợp dùng dữ liệu sau thời điểm dự đoán gây ra vấn đề gì?', ['Rò rỉ thông tin tương lai', 'Giảm phương sai đúng cách', 'Tăng số fold', 'Chuẩn hóa hợp lệ'], 0, 'Đặc trưng phải chỉ sử dụng thông tin sẵn có tại thời điểm dự đoán.'],
+            ['Khi chuỗi có xu hướng, dự đoán giá trị trung bình toàn bộ lịch sử có hạn chế gì?', ['Không phản ánh việc mức dữ liệu thay đổi theo thời gian', 'Luôn gây lỗi cú pháp', 'Không thể tính bằng số', 'Tự bảo đảm dự báo chính xác'], 0, 'Baseline trung bình cố định thường bỏ qua xu hướng và tính không dừng.']
+        ] },
+        { moduleIndex: 8, questions: [
+            ['Một nút trong cây quyết định thường chia mẫu dựa trên điều gì?', ['Điều kiện trên một đặc trưng và ngưỡng hoặc nhóm giá trị', 'Gradient của mọi mô hình trong tập', 'Thứ tự bảng chữ cái của nhãn', 'Kích thước tập test'], 0, 'Nút phân nhánh tách không gian đặc trưng theo một điều kiện.'],
+            ['Vì sao cây quyết định sâu dễ overfit?', ['Có thể tạo các vùng rất nhỏ để ghi nhớ chi tiết và nhiễu trong train', 'Không thể tạo dự đoán', 'Luôn bỏ qua đặc trưng', 'Không có nút lá'], 0, 'Độ sâu lớn tăng độ phức tạp và khả năng ghi nhớ dữ liệu huấn luyện.'],
+            ['Bagging tạo các mô hình thành phần bằng cách nào?', ['Huấn luyện trên các mẫu bootstrap rồi tổng hợp dự đoán', 'Huấn luyện tuần tự chỉ trên test', 'Dùng một mẫu duy nhất không lặp', 'Cộng tất cả nhãn thành một đặc trưng'], 0, 'Bootstrap lấy mẫu có hoàn lại; tổng hợp giúp giảm variance.'],
+            ['Random forest thêm yếu tố ngẫu nhiên nào bên cạnh bootstrap?', ['Chỉ xem một tập con đặc trưng tại các điểm chia', 'Buộc mọi cây giống nhau', 'Đảo nhãn test', 'Bỏ qua toàn bộ biến đầu vào'], 0, 'Chọn ngẫu nhiên đặc trưng làm các cây ít tương quan hơn.'],
+            ['Gradient boosting khác bagging cơ bản ở điểm nào?', ['Thường xây mô hình tuần tự để sửa lỗi của tổ hợp trước', 'Mọi mô hình đều độc lập hoàn toàn và chỉ lấy trung bình', 'Chỉ dùng cho phân cụm', 'Không có hàm mất mát'], 0, 'Boosting huấn luyện tuần tự, mỗi bước tập trung cải thiện phần còn sai.'],
+            ['Pruning cây nhằm mục đích gì?', ['Cắt nhánh ít hữu ích để kiểm soát độ phức tạp', 'Tăng số nhãn test', 'Chuẩn hóa mọi đặc trưng', 'Tạo thêm dữ liệu'], 0, 'Pruning làm cây gọn hơn, thường giúp hạn chế overfit.'],
+            ['Permutation importance ước lượng tầm quan trọng bằng cách nào?', ['Xáo trộn một đặc trưng và đo mức hiệu năng giảm trên dữ liệu đánh giá', 'So sánh tên cột theo alphabet', 'Đếm số lớp đầu ra', 'Tính độ sâu tối đa của rừng'], 0, 'Nếu xáo trộn làm điểm giảm đáng kể, mô hình phụ thuộc nhiều vào đặc trưng đó.']
+        ] },
+        { moduleIndex: 9, questions: [
+            ['Vì sao cần scale đặc trưng trước k-NN trong nhiều trường hợp?', ['Để một biến có thang số lớn không lấn át khoảng cách', 'Để tăng số nhãn', 'Để biến hồi quy thành phân cụm', 'Để loại bỏ mọi ngoại lệ'], 0, 'k-NN dựa trên khoảng cách nên thang đo lớn có thể chi phối kết quả.'],
+            ['SVM tuyến tính chọn biên phân tách theo mục tiêu nào?', ['Tìm biên có margin lớn, với đánh đổi sai phân loại qua tham số điều chuẩn', 'Tìm cụm có số lượng bằng số lớp', 'Tối đa hóa độ sâu cây', 'Giảm số hàng train về 1'], 0, 'SVM tối ưu margin và kiểm soát vi phạm biên bằng regularization.'],
+            ['Kernel trong SVM giúp ích gì?', ['Mô tả biên phi tuyến thông qua phép tương đồng giữa mẫu', 'Tự đặt nhãn cho dữ liệu', 'Bảo đảm không cần scale', 'Chỉ dùng để đánh giá accuracy'], 0, 'Kernel cho phép tính toán tương đồng tương ứng với biểu diễn trong không gian đặc trưng khác.'],
+            ['K-means yêu cầu xác định gì trước khi fit?', ['Số cụm k', 'Nhãn đúng cho mọi mẫu', 'Độ sâu cây', 'Số lớp dương tính'], 0, 'Số lượng cụm là đầu vào cần chọn cho K-means.'],
+            ['Một hạn chế thường gặp của K-means là gì?', ['Nhạy với scale, khởi tạo và dạng cụm không cầu', 'Không thể xử lý số', 'Bắt buộc phải có nhãn', 'Luôn tìm ra ý nghĩa nghiệp vụ của cụm'], 0, 'K-means tối ưu khoảng cách tới tâm nên nhạy với thang đo và hình dạng cụm.'],
+            ['DBSCAN phân biệt điểm nhiễu theo ý tưởng nào?', ['Điểm không thuộc vùng đủ dày đặc có thể được gán là nhiễu', 'Mọi điểm đều phải thuộc một cụm', 'Khoảng cách không được dùng', 'Cụm phải có tâm trung bình'], 0, 'DBSCAN xác định cụm theo mật độ và có thể để điểm rời rạc là nhiễu.'],
+            ['PCA chọn các thành phần đầu tiên theo tiêu chí nào?', ['Giữ các hướng có phương sai lớn nhất trong dữ liệu đã được center', 'Tối đa hóa accuracy của nhãn test', 'Chọn tên đặc trưng ngắn nhất', 'Tạo nhiều lớp phân loại hơn'], 0, 'PCA tìm hướng trực giao lần lượt giải thích phương sai lớn nhất.']
+        ] },
+        { moduleIndex: 10, questions: [
+            ['Một đặc trưng thời gian “số ngày kể từ lần mua gần nhất” là ví dụ của gì?', ['Feature engineering dựa trên ngữ cảnh nghiệp vụ', 'Nhãn do mô hình dự đoán', 'Tập test', 'Hàm kích hoạt'], 0, 'Đặc trưng mới được tạo bằng cách biến đổi dữ liệu thô thành tín hiệu có ý nghĩa.'],
+            ['Khi dùng oversampling cho lớp hiếm, nên thực hiện ở đâu?', ['Chỉ trên phần train của từng fold', 'Trên toàn bộ dữ liệu trước khi tách', 'Chỉ trên test', 'Trên dự đoán sau khi triển khai'], 0, 'Resampling trước khi chia có thể làm mẫu trùng xuất hiện ở cả train và test.'],
+            ['Vì sao cần chọn threshold theo bối cảnh thay vì luôn dùng 0.5?', ['Chi phí bỏ sót, báo động giả và khả năng xử lý khác nhau giữa ứng dụng', '0.5 không phải số hợp lệ', 'Mô hình không thể xuất xác suất', 'Threshold quyết định số đặc trưng'], 0, 'Ngưỡng cần phản ánh chi phí sai lầm và mục tiêu vận hành.'],
+            ['Data drift mô tả hiện tượng nào?', ['Phân phối dữ liệu đầu vào thay đổi theo thời gian', 'Mã nguồn ngừng chạy', 'Mọi nhãn đều bị xóa', 'Mô hình có ít tham số'], 0, 'Data drift là thay đổi phân phối đầu vào, không tự động chứng minh chất lượng đã giảm.'],
+            ['Concept drift khác data drift ở điểm nào?', ['Quan hệ giữa đầu vào và mục tiêu thay đổi', 'Kích thước tệp luôn thay đổi', 'Tên cột được sắp xếp lại', 'Chỉ tỷ lệ thiếu dữ liệu thay đổi'], 0, 'Concept drift là thay đổi quy luật liên hệ giữa X và y.'],
+            ['Khi hai đặc trưng tương quan rất cao, diễn giải importance cần thận trọng vì sao?', ['Thông tin đóng góp có thể được chia sẻ khiến importance của từng biến riêng lẻ gây hiểu nhầm', 'Mô hình không thể nhận số', 'Tương quan bảo đảm nhân quả', 'Không thể tính metric'], 0, 'Các biến tương quan có thể thay thế nhau nên mức importance riêng lẻ không phản ánh đầy đủ vai trò chung.']
+        ] },
+        { moduleIndex: 11, questions: [
+            ['Một neuron cơ bản tính gì trước khi qua activation?', ['Tổ hợp tuyến tính wᵀx + b', 'Một phép chia train/test', 'Số cụm K-means', 'Độ chính xác test'], 0, 'Neuron tính tổng có trọng số của đầu vào cộng bias trước activation.'],
+            ['Nếu mạng nhiều tầng chỉ dùng phép biến đổi tuyến tính, điều gì đúng?', ['Chồng các tầng tuyến tính vẫn tương đương một phép biến đổi tuyến tính', 'Mạng chắc chắn biểu diễn mọi hàm', 'Backpropagation không cần gradient', 'Output luôn là xác suất'], 0, 'Không có phi tuyến, hợp thành các phép tuyến tính vẫn là tuyến tính.'],
+            ['Backpropagation dùng quy tắc nào để tính gradient qua các tầng?', ['Quy tắc dây chuyền', 'Định lý Bayes', 'Bootstrap', 'One-hot encoding'], 0, 'Backpropagation áp dụng chain rule từ loss ngược về từng tham số.'],
+            ['Dropout thường được áp dụng như thế nào?', ['Ngẫu nhiên bỏ một số activation trong lúc huấn luyện', 'Xóa các nhãn test', 'Bỏ toàn bộ dữ liệu đầu vào vĩnh viễn', 'Tăng độ sâu mọi cây'], 0, 'Dropout gây nhiễu có kiểm soát khi train nhằm hạn chế phụ thuộc quá mức vào neuron.'],
+            ['Nếu train loss giảm nhưng validation loss tăng, nên nghi ngờ gì?', ['Overfitting và cân nhắc regularization hoặc early stopping', 'Underfitting chắc chắn', 'Tập test bị chuẩn hóa', 'Gradient luôn bằng 0'], 0, 'Khoảng cách tăng giữa train và validation là dấu hiệu mô hình có thể quá khớp.'],
+            ['Vì sao learning rate quá cao có thể khiến loss thành NaN hoặc dao động?', ['Cập nhật quá lớn gây mất ổn định số hoặc vượt vùng tối ưu', 'Batch size luôn bằng 1', 'Nhãn được mã hóa one-hot', 'Dữ liệu có tên cột dài'], 0, 'Bước gradient quá lớn làm quá trình tối ưu bất ổn.']
+        ] },
+        { moduleIndex: 12, questions: [
+            ['Convolution trong CNN tận dụng đặc điểm nào của ảnh?', ['Quan hệ không gian cục bộ và chia sẻ bộ lọc trên nhiều vị trí', 'Mỗi pixel cần một mô hình độc lập hoàn toàn', 'Ảnh không có chiều', 'Nhãn phải liên tục'], 0, 'Kernel cục bộ được áp dụng lặp lại, chia sẻ trọng số theo không gian.'],
+            ['Data augmentation cho ảnh nên tuân theo nguyên tắc nào?', ['Biến đổi vẫn phải giữ nguyên ý nghĩa nhãn của mẫu', 'Thay nhãn ngẫu nhiên để tăng đa dạng', 'Chỉ augment tập test trước đánh giá', 'Biến mọi ảnh thành một màu'], 0, 'Augmentation hợp lý tạo biến thể mà nhãn vẫn đúng.'],
+            ['Khi nhiều ảnh của cùng một người xuất hiện trong dữ liệu, nên tách tập ra sao?', ['Group split theo người để tránh cùng người có mặt ở train và test', 'Chia ngẫu nhiên từng ảnh luôn luôn', 'Fit trên test rồi chia', 'Sắp xếp theo kích thước tệp'], 0, 'Chia theo nhóm giúp đánh giá khả năng tổng quát sang người chưa thấy.'],
+            ['Trong bài toán chuỗi, thứ tự các token hoặc thời điểm thường quan trọng vì sao?', ['Vị trí và ngữ cảnh trước/sau mang thông tin cho dự đoán', 'Mọi chuỗi luôn bất biến khi đảo', 'Chuỗi không thể chứa nhãn', 'Thứ tự chỉ ảnh hưởng tên tệp'], 0, 'Thông tin tuần tự phụ thuộc thứ tự và ngữ cảnh giữa các phần tử.'],
+            ['Attention trong Transformer chủ yếu cho phép mô hình làm gì?', ['Tính trọng số liên hệ giữa các vị trí trong chuỗi để kết hợp ngữ cảnh', 'Chỉ nhìn vào token cuối', 'Tự động gán nhãn dữ liệu train', 'Xóa yêu cầu về dữ liệu'], 0, 'Attention tạo biểu diễn ngữ cảnh bằng cách liên hệ các vị trí trong chuỗi.'],
+            ['Khi chuỗi dài hơn giới hạn ngữ cảnh của mô hình, vấn đề nào phát sinh?', ['Không thể xử lý toàn bộ chuỗi cùng lúc nếu chưa có chiến lược cắt/chia phù hợp', 'Mọi token trở thành nhãn', 'Metric tự đổi sang accuracy', 'Mô hình hết cần bộ nhớ'], 0, 'Giới hạn ngữ cảnh buộc phải chọn cách cắt, chia đoạn hoặc tổng hợp chuỗi.']
+        ] },
+        { moduleIndex: 13, questions: [
+            ['Tokenization biến văn bản thành gì để mô hình xử lý?', ['Chuỗi token hoặc ID token', 'Ma trận confusion', 'Tọa độ ảnh', 'Một nhãn duy nhất luôn đúng'], 0, 'Tokenizer chia văn bản thành đơn vị token và ánh xạ chúng sang ID.'],
+            ['Subword tokenization giúp xử lý từ hiếm như thế nào?', ['Ghép từ từ các mảnh nhỏ đã biết thay vì cần mục từ riêng cho mọi từ', 'Xóa mọi từ hiếm', 'Dùng nhãn test làm từ điển', 'Bảo đảm hiểu hoàn hảo mọi ngôn ngữ'], 0, 'Các mảnh con giúp biểu diễn từ ngoài vốn từ hoàn chỉnh.'],
+            ['Vì sao cần tách train/test theo tài liệu hoặc người viết trong một số bài toán NLP?', ['Tránh các đoạn gần trùng hoặc cùng tác giả rò rỉ qua hai tập', 'Vì văn bản không thể chia ngẫu nhiên', 'Để mọi câu có cùng độ dài', 'Để bỏ bước tokenization'], 0, 'Chia theo nhóm liên quan giảm nguy cơ đánh giá lạc quan do nội dung gần trùng.'],
+            ['Embedding biểu diễn token thường có dạng nào?', ['Vector số học mang thông tin biểu diễn đã học', 'Một câu hỏi trắc nghiệm', 'Một cây quyết định', 'Một phân vùng dữ liệu'], 0, 'Embedding ánh xạ token thành vector trong không gian liên tục.'],
+            ['Trong phân loại cảm xúc, nhãn mục tiêu có thể là gì?', ['Tích cực, tiêu cực hoặc trung tính theo định nghĩa bộ dữ liệu', 'Số lượng pixel', 'Learning rate của optimizer', 'Tên tokenizer duy nhất'], 0, 'Nhãn biểu diễn lớp cảm xúc mà bài toán cần dự đoán.'],
+            ['Khi dùng mô hình ngôn ngữ tạo câu trả lời, vì sao cần đánh giá nội dung đầu ra?', ['Đầu ra có thể trôi chảy nhưng vẫn sai, thiên lệch hoặc không phù hợp', 'Vì văn bản không thể kiểm tra', 'Vì tokenization luôn sai', 'Vì mô hình không có đầu ra'], 0, 'Độ trôi chảy không đảm bảo tính đúng đắn hoặc an toàn của nội dung.']
+        ] },
+        { moduleIndex: 14, questions: [
+            ['Trong MDP, policy (chính sách) mô tả điều gì?', ['Cách chọn hành động dựa trên trạng thái', 'Tập validation', 'Hệ số hồi quy tuyến tính', 'Số chiều PCA'], 0, 'Policy ánh xạ trạng thái hoặc quan sát thành hành động.'],
+            ['Exploration trong học tăng cường có mục đích gì?', ['Thử hành động để thu thập thông tin về phần thưởng và môi trường', 'Luôn lặp lại hành động hiện tốt nhất', 'Xóa trạng thái môi trường', 'Tắt phần thưởng'], 0, 'Exploration giúp tìm hiểu hành động chưa biết thay vì chỉ khai thác điều đã biết.'],
+            ['Reward quá thưa (sparse reward) khiến việc học khó hơn vì sao?', ['Tác tử ít nhận tín hiệu cho biết hành động nào dẫn đến kết quả mong muốn', 'Tác tử nhận quá nhiều nhãn', 'Mọi hành động đều bị cấm', 'Không có trạng thái'], 0, 'Phản hồi hiếm làm khó việc gán công cho chuỗi hành động trước đó.'],
+            ['Pipeline triển khai ML nên đóng gói thành phần nào cùng mô hình?', ['Các bước tiền xử lý cần thiết để train và inference nhất quán', 'Chỉ dữ liệu test', 'Mật khẩu của người dùng', 'Toàn bộ lịch sử hội thoại'], 0, 'Tiền xử lý phải được áp dụng giống nhau khi huấn luyện và dự đoán.'],
+            ['Data drift được phát hiện sau triển khai. Bước nào hợp lý trước khi retrain?', ['Xác nhận chất lượng dữ liệu và đánh giá ảnh hưởng bằng benchmark phù hợp', 'Tự động đưa mọi mô hình mới lên production', 'Xóa tập test cũ', 'Bỏ qua kiểm tra nhãn'], 0, 'Drift là tín hiệu điều tra; cần xác minh và đánh giá trước khi thay đổi mô hình.'],
+            ['Shadow deployment dùng để làm gì?', ['Chạy mô hình mới song song để quan sát dự đoán trước khi chuyển lưu lượng chính', 'Huấn luyện trên dữ liệu giả vĩnh viễn', 'Thay thế mọi giám sát', 'Ẩn metric khỏi người vận hành'], 0, 'Shadow deployment cho phép so sánh mô hình mới mà chưa dùng đầu ra để phục vụ người dùng.']
+        ] }
+    ];
+    const extraQuestionCount = extraQuestions.reduce((total, group) => total + group.questions.length, 0);
+    if (extraQuestionCount !== 100) throw new Error(`Cần đúng 100 câu hỏi mới, hiện có ${extraQuestionCount}.`);
+    const quizQuestions = modules.flatMap((module, moduleIndex) => {
+        const options = module.quiz.options;
+        const shift = (moduleIndex + 1) % options.length;
+        const existingQuestion = {
+            moduleIndex,
+            q: module.quiz.q,
+            options: options.map((_, optionIndex) => options[(optionIndex - shift + options.length) % options.length]),
+            answer: (module.quiz.answer + shift) % options.length,
+            explain: module.quiz.explain
+        };
+        const group = extraQuestions.find(item => item.moduleIndex === moduleIndex);
+        return [existingQuestion, ...group.questions.map(([q, options, answer, explain], questionIndex) => {
+            const shift = (moduleIndex + questionIndex) % options.length;
+            return {
+                moduleIndex,
+                q,
+                options: options.map((_, optionIndex) => options[(optionIndex - shift + options.length) % options.length]),
+                answer: (answer + shift) % options.length,
+                explain
+            };
+        })];
+    });
+    if (quizQuestions.length !== 115) throw new Error(`Ngân hàng cần đúng 115 câu, hiện có ${quizQuestions.length}.`);
+
+    const categories = ['Tất cả', ...new Set(modules.map(module => module.category))];
+    const stateKey = 'ml_lab_learning_progress_v1';
+    let state = loadState();
+    let activeCategory = 'Tất cả';
+    const quizStateKey = 'ml_lab_quiz_progress_v1';
+    const quizLetters = ['A', 'B', 'C', 'D'];
+    let activeQuizTopic = 0;
+    let visibleQuizQuestions = quizQuestions.map((_, index) => index);
+    let currentQuizIndex = 0;
+    let quizAnswers = loadQuizAnswers();
+    let wrongQuizQuestions = null;
+    let toastTimer;
+
+    function loadState() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(stateKey) || '{}');
+            return {
+                lessons: Array.isArray(saved.lessons) ? saved.lessons : [],
+                quizzes: Array.isArray(saved.quizzes) ? saved.quizzes : [],
+                theme: saved.theme === 'light' ? 'light' : 'dark'
+            };
+        } catch (error) {
+            console.error('Không thể đọc tiến độ học Machine Learning:', error);
+            return { lessons: [], quizzes: [], theme: 'dark' };
+        }
+    }
+    function saveState() {
+        try {
+            localStorage.setItem(stateKey, JSON.stringify(state));
+        } catch (error) {
+            console.error('Không thể lưu tiến độ học Machine Learning:', error);
+            showToast('Không lưu được tiến độ. Hãy kiểm tra bộ nhớ trình duyệt.');
+        }
+    }
+    function loadQuizAnswers() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(quizStateKey) || '{}');
+            if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return {};
+            return Object.fromEntries(Object.entries(saved).filter(([id, answer]) =>
+                /^\d+$/.test(id) && Number(id) < quizQuestions.length &&
+                Number.isInteger(answer) && answer >= 0 && answer < quizQuestions[Number(id)].options.length
+            ));
+        } catch (error) {
+            console.error('Không thể đọc tiến độ trắc nghiệm Machine Learning:', error);
+            return {};
+        }
+    }
+    function saveQuizAnswers() {
+        try {
+            localStorage.setItem(quizStateKey, JSON.stringify(quizAnswers));
+        } catch (error) {
+            console.error('Không thể lưu tiến độ trắc nghiệm Machine Learning:', error);
+            showToast('Không lưu được tiến độ trắc nghiệm. Hãy kiểm tra bộ nhớ trình duyệt.');
+        }
+    }
+    function lessonId(moduleIndex, lessonIndex) { return `${moduleIndex}:${lessonIndex}`; }
+    function moduleDone(index) {
+        return modules[index].lessons.every((_, lessonIndex) => state.lessons.includes(lessonId(index, lessonIndex))) &&
+            state.quizzes.includes(index);
+    }
+    function completion() {
+        const allLessons = modules.reduce((sum, module) => sum + module.lessons.length, 0);
+        const total = allLessons + modules.length;
+        return Math.round((state.lessons.length + state.quizzes.length) / total * 100);
+    }
+    function renderStats() {
+        document.getElementById('module-total').textContent = modules.length;
+        document.getElementById('quiz-total').textContent = modules.length;
+        document.getElementById('curriculum-total').textContent = modules.length;
+        document.getElementById('module-stat').textContent = modules.filter((_, index) => moduleDone(index)).length;
+        document.getElementById('lesson-stat').textContent = state.lessons.length;
+        document.getElementById('quiz-stat').textContent = state.quizzes.length;
+        document.getElementById('progress-stat').textContent = completion();
+        document.getElementById('top-progress').textContent = `${completion()}%`;
+        document.getElementById('module-nav').innerHTML = modules.map((module, index) => `
+            <button class="module-link ${moduleDone(index) ? 'done' : ''}" onclick="openModule(${index})">
+                <span class="module-num">${moduleDone(index) ? '✓' : String(index + 1).padStart(2, '0')}</span>
+                <span class="module-name">${escapeHtml(module.title)}</span>
+            </button>`).join('');
+    }
+    function renderFilters() {
+        document.getElementById('filters').innerHTML = categories.map(category => `
+            <button class="filter-btn ${activeCategory === category ? 'active' : ''}" onclick="setCategory('${escapeJs(category)}')">${escapeHtml(category)}</button>
+        `).join('');
+    }
+    function renderModules() {
+        const query = document.getElementById('module-search').value.trim().toLocaleLowerCase('vi');
+        const visible = modules.map((module, index) => ({ module, index })).filter(({ module }) =>
+            (activeCategory === 'Tất cả' || module.category === activeCategory) &&
+            `${module.title} ${module.summary} ${module.category} ${module.outcomes.join(' ')}`.toLocaleLowerCase('vi').includes(query)
+        );
+        document.getElementById('course-grid').innerHTML = visible.length ? visible.map(({ module, index }) => {
+            const doneCount = module.lessons.filter((_, lessonIndex) => state.lessons.includes(lessonId(index, lessonIndex))).length;
+            const quizDone = state.quizzes.includes(index);
+            const percent = Math.round((doneCount + Number(quizDone)) / (module.lessons.length + 1) * 100);
+            return `<article class="course-card">
+                <div class="card-top"><span class="tag">${escapeHtml(module.category)}</span><span class="card-num">CHƯƠNG ${String(index + 1).padStart(2, '0')}</span></div>
+                <h3>${escapeHtml(module.title)}</h3><p>${escapeHtml(module.summary)}</p>
+                <div class="card-bottom"><span class="lesson-count">${module.lessons.length} bài · ${escapeHtml(module.time)} · ${percent}%</span>
+                    <button class="open-module" onclick="openModule(${index})">${moduleDone(index) ? 'Ôn lại' : 'Vào học'} →</button></div>
+                <div class="card-progress"><span style="width:${percent}%"></span></div>
+            </article>`;
+        }).join('') : '<div class="empty-state">Không tìm thấy chương phù hợp. Thử từ khóa khác nhé.</div>';
+    }
+    function setCategory(category) {
+        activeCategory = category;
+        renderFilters();
+        renderModules();
+    }
+    function openModule(index) {
+        const module = modules[index];
+        document.getElementById('module-eyebrow').textContent = `CHƯƠNG ${String(index + 1).padStart(2, '0')} · ${module.category} · ${module.time}`;
+        document.getElementById('module-title').textContent = module.title;
+        document.getElementById('module-summary').textContent = module.summary;
+        document.getElementById('module-outcomes').innerHTML = `<strong>Sau chương này, bạn có thể:</strong>${module.outcomes.map(item => `<span>✓ ${escapeHtml(item)}</span>`).join('')}`;
+        document.getElementById('module-lessons').innerHTML = module.lessons.map((lesson, lessonIndex) => {
+            const done = state.lessons.includes(lessonId(index, lessonIndex));
+            return `<article class="lesson">
+                <div class="lesson-title"><h3>${escapeHtml(lesson.title)}</h3>
+                    <button class="lesson-check ${done ? 'done' : ''}" onclick="toggleLesson(${index},${lessonIndex})">${done ? '✓ Đã học' : 'Đánh dấu đã học'}</button></div>
+                <div class="lesson-body">${lesson.body}</div>
+            </article>`;
+        }).join('');
+        renderQuiz(index);
+        document.getElementById('overview-page').hidden = true;
+        document.getElementById('module-page').hidden = false;
+        document.getElementById('breadcrumb').innerHTML = `Học tập <span aria-hidden="true">/</span> ${escapeHtml(module.title)}`;
+        document.getElementById('sidebar').classList.remove('open');
+        updateSidebarToggle();
+        window.scrollTo(0, 0);
+    }
+    function renderQuiz(index) {
+        const quiz = modules[index].quiz;
+        const passed = state.quizzes.includes(index);
+        document.getElementById('module-quiz').innerHTML = `
+            <h3>✓ Quiz tự kiểm tra ${passed ? '· Đã đạt' : ''}</h3><p class="quiz-q">${escapeHtml(quiz.q)}</p>
+            <div class="quiz-options">${quiz.options.map((option, optionIndex) =>
+                `<button class="quiz-option" onclick="answerQuiz(${index},${optionIndex})">${String.fromCharCode(65 + optionIndex)}. ${escapeHtml(option)}</button>`
+            ).join('')}</div><p class="quiz-feedback" id="quiz-feedback">${passed ? 'Bạn đã hoàn thành quiz này. Có thể thử lại để ôn tập.' : 'Chọn một đáp án.'}</p>`;
+    }
+    function quizQuestionsForTopic(topicIndex) {
+        return quizQuestions.map((question, index) =>
+            topicIndex === 0 || question.moduleIndex === topicIndex - 1 ? index : -1
+        ).filter(index => index >= 0);
+    }
+    function buildQuizTopics() {
+        const container = document.getElementById('quiz-topics');
+        const topicItems = [
+            { index: 0, icon: '✦', name: 'Tất cả câu hỏi', ids: quizQuestions.map((_, index) => index) },
+            ...modules.map((module, moduleIndex) => ({
+                index: moduleIndex + 1,
+                icon: String(moduleIndex + 1).padStart(2, '0'),
+                name: module.title,
+                ids: quizQuestionsForTopic(moduleIndex + 1)
+            }))
+        ];
+        if (activeQuizTopic === -1) {
+            topicItems.unshift({ index: -1, icon: '↻', name: 'Ôn câu sai', ids: visibleQuizQuestions });
+        }
+
+        container.innerHTML = topicItems.map(topic => {
+            const completed = topic.ids.filter(id => Object.prototype.hasOwnProperty.call(quizAnswers, id)).length;
+            return `<button class="quiz-topic" type="button" aria-pressed="${topic.index === activeQuizTopic}" onclick="selectQuizTopic(${topic.index})">
+                <span class="quiz-topic-icon" aria-hidden="true">${topic.icon}</span>
+                <span class="quiz-topic-name">${escapeHtml(topic.name)}</span>
+                <span class="quiz-topic-count">${completed}/${topic.ids.length}</span>
+            </button>`;
+        }).join('');
+    }
+    function renderQuizProgress() {
+        const validAnswers = Object.entries(quizAnswers).filter(([id, answer]) =>
+            Number.isInteger(Number(id)) && quizQuestions[Number(id)] &&
+            Number.isInteger(answer) && answer >= 0 && answer < quizQuestions[Number(id)].options.length
+        );
+        const correct = validAnswers.filter(([id, answer]) => quizQuestions[Number(id)].answer === answer).length;
+        const completed = validAnswers.length;
+        const percentComplete = Math.round(completed / quizQuestions.length * 100);
+        const percentCorrect = completed ? Math.round(correct / completed * 100) : 0;
+        document.getElementById('quiz-progress-label').textContent = `${completed} / ${quizQuestions.length}`;
+        document.getElementById('quiz-progress-fill').style.width = `${percentComplete}%`;
+        document.getElementById('quiz-progress-track').setAttribute('aria-valuenow', String(completed));
+        document.getElementById('quiz-score').textContent = `${percentCorrect}%`;
+    }
+    function selectQuizTopic(topicIndex) {
+        activeQuizTopic = topicIndex;
+        visibleQuizQuestions = topicIndex === -1
+            ? [...wrongQuizQuestions]
+            : quizQuestionsForTopic(topicIndex);
+        currentQuizIndex = 0;
+        renderQuizPractice();
+    }
+    function answerQuizQuestion(optionIndex) {
+        const questionId = visibleQuizQuestions[currentQuizIndex];
+        if (Object.prototype.hasOwnProperty.call(quizAnswers, questionId)) return;
+        quizAnswers[questionId] = optionIndex;
+        saveQuizAnswers();
+        renderQuizPractice();
+    }
+    function renderQuizPractice() {
+        if (!visibleQuizQuestions.length) {
+            document.getElementById('quiz-question-text').textContent = 'Chưa có câu trả lời sai để ôn lại.';
+            document.getElementById('quiz-answer-list').replaceChildren();
+            document.getElementById('quiz-feedback').className = 'quiz-feedback';
+            document.getElementById('quiz-total-position').textContent = '/ 0';
+            document.getElementById('quiz-number').textContent = '00';
+            document.getElementById('quiz-topic-pill').textContent = 'Ôn tập';
+            document.getElementById('quiz-question-kicker').textContent = '';
+            document.getElementById('quiz-prev').disabled = true;
+            document.getElementById('quiz-next').disabled = true;
+            document.getElementById('quiz-results-button').disabled = true;
+            document.getElementById('quiz-dots').replaceChildren();
+            renderQuizProgress();
+            buildQuizTopics();
+            return;
+        }
+
+        const questionId = visibleQuizQuestions[currentQuizIndex];
+        const question = quizQuestions[questionId];
+        const selected = quizAnswers[questionId];
+        const isCorrect = selected === question.answer;
+        const module = modules[question.moduleIndex];
+        document.getElementById('quiz-number').textContent = String(currentQuizIndex + 1).padStart(2, '0');
+        document.getElementById('quiz-total-position').textContent = `/ ${visibleQuizQuestions.length}`;
+        document.getElementById('quiz-topic-pill').textContent = module.title;
+        document.getElementById('quiz-question-kicker').textContent =
+            activeQuizTopic === 0 ? `Chương ${question.moduleIndex + 1} · Câu ${questionId + 1}` :
+            activeQuizTopic === -1 ? `Ôn câu sai · Câu ${questionId + 1}` :
+            `Câu ${currentQuizIndex + 1} trong chương`;
+        document.getElementById('quiz-question-text').textContent = question.q;
+
+        const answerList = document.getElementById('quiz-answer-list');
+        answerList.replaceChildren();
+        question.options.forEach((option, optionIndex) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'quiz-answer-option';
+            button.disabled = selected !== undefined;
+            if (selected !== undefined && optionIndex === question.answer) button.classList.add('is-correct');
+            if (selected === optionIndex && !isCorrect) button.classList.add('is-wrong');
+            button.innerHTML = `<span class="quiz-answer-letter">${quizLetters[optionIndex]}</span><span class="quiz-answer-text"></span><span class="quiz-answer-check" aria-hidden="true">✓</span>`;
+            button.querySelector('.quiz-answer-text').textContent = option;
+            button.setAttribute('aria-label', `Đáp án ${quizLetters[optionIndex]}: ${option}`);
+            button.addEventListener('click', () => answerQuizQuestion(optionIndex));
+            answerList.appendChild(button);
+        });
+
+        const feedback = document.getElementById('quiz-feedback');
+        feedback.className = 'quiz-feedback';
+        feedback.textContent = '';
+        if (selected !== undefined) {
+            feedback.classList.add('visible', isCorrect ? 'good' : 'needs-work');
+            feedback.textContent = `${isCorrect ? 'Chính xác!' : `Chưa chính xác — đáp án đúng là ${quizLetters[question.answer]}.`} ${question.explain}`;
+        }
+
+        document.getElementById('quiz-prev').disabled = currentQuizIndex === 0;
+        document.getElementById('quiz-next').disabled = currentQuizIndex === visibleQuizQuestions.length - 1;
+        document.getElementById('quiz-results-button').disabled = false;
+        const dots = document.getElementById('quiz-dots');
+        dots.replaceChildren();
+        visibleQuizQuestions.forEach((id, index) => {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'quiz-dot';
+            if (index === currentQuizIndex) dot.classList.add('current');
+            if (Object.prototype.hasOwnProperty.call(quizAnswers, id)) dot.classList.add('answered');
+            dot.textContent = String(index + 1);
+            dot.setAttribute('aria-label', `Đi đến câu ${index + 1}`);
+            dot.setAttribute('aria-current', index === currentQuizIndex ? 'step' : 'false');
+            dot.addEventListener('click', () => { currentQuizIndex = index; renderQuizPractice(); });
+            dots.appendChild(dot);
+        });
+        renderQuizProgress();
+        buildQuizTopics();
+    }
+    function showQuizResults() {
+        const answeredIds = visibleQuizQuestions.filter(id => Number.isInteger(quizAnswers[id]));
+        const correct = answeredIds.filter(id => quizAnswers[id] === quizQuestions[id].answer).length;
+        const incorrect = answeredIds.length - correct;
+        const unanswered = visibleQuizQuestions.length - answeredIds.length;
+        const percent = visibleQuizQuestions.length ? Math.round(correct / visibleQuizQuestions.length * 100) : 0;
+        document.getElementById('quiz-results-percent').textContent = `${percent}%`;
+        document.getElementById('quiz-results-correct').textContent = String(correct);
+        document.getElementById('quiz-results-wrong').textContent = String(incorrect);
+        document.getElementById('quiz-results-unanswered').textContent = String(unanswered);
+        document.getElementById('quiz-results-copy').textContent =
+            `Bạn đã trả lời ${answeredIds.length} trên ${visibleQuizQuestions.length} câu trong phạm vi đang chọn. Tiến độ được lưu trên thiết bị này.`;
+        document.getElementById('quiz-review-wrong').disabled = incorrect === 0;
+        document.getElementById('quiz-results-modal').classList.add('open');
+        document.getElementById('quiz-results-close').focus();
+    }
+    function closeQuizResults() {
+        document.getElementById('quiz-results-modal').classList.remove('open');
+        document.getElementById('quiz-results-button').focus();
+    }
+    function reviewWrongQuizQuestions() {
+        wrongQuizQuestions = visibleQuizQuestions.filter(id =>
+            Number.isInteger(quizAnswers[id]) && quizAnswers[id] !== quizQuestions[id].answer
+        );
+        if (!wrongQuizQuestions.length) return;
+        activeQuizTopic = -1;
+        visibleQuizQuestions = [...wrongQuizQuestions];
+        currentQuizIndex = 0;
+        document.getElementById('quiz-results-modal').classList.remove('open');
+        renderQuizPractice();
+        showToast(`Đang ôn lại ${wrongQuizQuestions.length} câu chưa đúng.`);
+    }
+    function resetQuizPractice() {
+        if (!window.confirm('Bạn có chắc muốn xóa tiến độ trong phạm vi đang chọn và bắt đầu lại?')) return;
+        visibleQuizQuestions.forEach(id => { delete quizAnswers[id]; });
+        saveQuizAnswers();
+        wrongQuizQuestions = null;
+        if (activeQuizTopic === -1) {
+            activeQuizTopic = 0;
+            visibleQuizQuestions = quizQuestionsForTopic(0);
+        }
+        currentQuizIndex = 0;
+        document.getElementById('quiz-results-modal').classList.remove('open');
+        renderQuizPractice();
+        showToast('Đã bắt đầu lại phần trắc nghiệm đang chọn.');
+    }
+    document.getElementById('quiz-prev').addEventListener('click', () => {
+        if (currentQuizIndex > 0) { currentQuizIndex--; renderQuizPractice(); }
+    });
+    document.getElementById('quiz-next').addEventListener('click', () => {
+        if (currentQuizIndex < visibleQuizQuestions.length - 1) { currentQuizIndex++; renderQuizPractice(); }
+    });
+    document.getElementById('quiz-results-button').addEventListener('click', showQuizResults);
+    document.getElementById('quiz-results-close').addEventListener('click', closeQuizResults);
+    document.getElementById('quiz-review-wrong').addEventListener('click', reviewWrongQuizQuestions);
+    document.getElementById('quiz-reset').addEventListener('click', resetQuizPractice);
+    document.getElementById('quiz-results-modal').addEventListener('click', event => {
+        if (event.target === event.currentTarget) closeQuizResults();
+    });
+    function toggleLesson(moduleIndex, lessonIndex) {
+        const id = lessonId(moduleIndex, lessonIndex);
+        const scrollTop = window.scrollY;
+        if (state.lessons.includes(id)) state.lessons = state.lessons.filter(item => item !== id);
+        else state.lessons.push(id);
+        saveState();
+        renderStats();
+        renderModules();
+        openModule(moduleIndex);
+        window.scrollTo(0, scrollTop);
+    }
+    function answerQuiz(moduleIndex, optionIndex) {
+        const quiz = modules[moduleIndex].quiz;
+        const options = document.querySelectorAll('.quiz-option');
+        options.forEach((button, index) => {
+            button.classList.toggle('correct', index === quiz.answer);
+            button.classList.toggle('wrong', index === optionIndex && index !== quiz.answer);
+        });
+        const feedback = document.getElementById('quiz-feedback');
+        if (optionIndex === quiz.answer) {
+            state.quizzes = [...new Set([...state.quizzes, moduleIndex])];
+            saveState();
+            feedback.textContent = `Chính xác! ${quiz.explain}`;
+            renderStats();
+            renderModules();
+        } else {
+            feedback.textContent = `Chưa đúng. ${quiz.explain}`;
+        }
+    }
+    function openFirstIncomplete() {
+        const index = modules.findIndex((_, moduleIndex) => !moduleDone(moduleIndex));
+        openModule(index < 0 ? 0 : index);
+    }
+    function showOverview() {
+        document.getElementById('module-page').hidden = true;
+        document.getElementById('overview-page').hidden = false;
+        document.getElementById('breadcrumb').innerHTML = 'Học tập <span aria-hidden="true">/</span> Machine Learning';
+        window.scrollTo(0, 0);
+    }
+    function openBook() { document.getElementById('book-panel').classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeBook() { document.getElementById('book-panel').classList.remove('open'); document.body.style.overflow = ''; }
+    function toggleTheme() {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        document.body.classList.toggle('light', state.theme === 'light');
+        saveState();
+    }
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (window.matchMedia('(max-width:760px)').matches) {
+            sidebar.classList.toggle('open');
+        } else {
+            document.body.classList.toggle('sidebar-hidden');
+        }
+        updateSidebarToggle();
+    }
+    function updateSidebarToggle() {
+        const sidebar = document.getElementById('sidebar');
+        const expanded = window.matchMedia('(max-width:760px)').matches
+            ? sidebar.classList.contains('open')
+            : !document.body.classList.contains('sidebar-hidden');
+        const label = expanded ? 'Ẩn thanh công cụ bên trái' : 'Hiện thanh công cụ bên trái';
+        document.getElementById('sidebar-toggle').setAttribute('aria-label', label);
+        document.getElementById('sidebar-toggle').title = label;
+    }
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
+    }
+    function escapeJs(value) { return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+    function textPositionAt(block, targetOffset) {
+        const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+        let textNode;
+        let offset = 0;
+        let lastNode = null;
+        while ((textNode = walker.nextNode())) {
+            lastNode = textNode;
+            if (targetOffset <= offset + textNode.textContent.length) {
+                return { node: textNode, offset: targetOffset - offset };
+            }
+            offset += textNode.textContent.length;
+        }
+        return lastNode ? { node: lastNode, offset: lastNode.textContent.length } : null;
+    }
+    function clearSentenceHighlight() {
+        if (window.CSS && CSS.highlights) CSS.highlights.delete('hovered-sentence');
+    }
+    function highlightSentenceAtPointer(event) {
+        const block = event.target.closest('.hero-copy, .course-card p, .concept span, .lesson-body p, .lesson-body li, .module-page-head p, .core-concept p');
+        if (!block) {
+            clearSentenceHighlight();
+            return;
+        }
+        const caret = document.caretPositionFromPoint
+            ? document.caretPositionFromPoint(event.clientX, event.clientY)
+            : document.caretRangeFromPoint?.(event.clientX, event.clientY);
+        if (!caret || !block.contains(caret.offsetNode || caret.startContainer)) {
+            clearSentenceHighlight();
+            return;
+        }
+
+        const text = block.textContent;
+        const caretNode = caret.offsetNode || caret.startContainer;
+        const caretNodeOffset = caret.offset ?? caret.startOffset;
+        const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+        let textNode;
+        let caretOffset = 0;
+        while ((textNode = walker.nextNode())) {
+            if (textNode === caretNode) {
+                caretOffset += caretNodeOffset;
+                break;
+            }
+            caretOffset += textNode.textContent.length;
+        }
+
+        let sentenceStart = 0;
+        let sentenceEnd = text.length;
+        const endings = /[.!?。！？]+["'”’»)]*(?=\s|$)/gu;
+        let ending;
+        while ((ending = endings.exec(text))) {
+            const boundary = ending.index + ending[0].length;
+            if (caretOffset <= boundary) {
+                sentenceEnd = boundary;
+                break;
+            }
+            sentenceStart = boundary;
+        }
+        while (/\s/.test(text[sentenceStart] || '')) sentenceStart++;
+        while (sentenceEnd > sentenceStart && /\s/.test(text[sentenceEnd - 1])) sentenceEnd--;
+
+        const start = textPositionAt(block, sentenceStart);
+        const end = textPositionAt(block, sentenceEnd);
+        if (!start || !end || !window.CSS || !CSS.highlights || typeof Highlight === 'undefined') {
+            clearSentenceHighlight();
+            return;
+        }
+        const range = document.createRange();
+        range.setStart(start.node, start.offset);
+        range.setEnd(end.node, end.offset);
+        CSS.highlights.set('hovered-sentence', new Highlight(range));
+    }
+    document.addEventListener('keydown', event => {
+        if (document.getElementById('quiz-results-modal').classList.contains('open')) {
+            if (event.key === 'Escape') closeQuizResults();
+            return;
+        }
+        if (event.key === 'Escape') { closeBook(); document.getElementById('sidebar').classList.remove('open'); }
+        if (event.target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
+        const letterIndex = quizLetters.indexOf(event.key.toUpperCase());
+        if (letterIndex >= 0 && !(event.target instanceof Element && event.target.closest('button'))) answerQuizQuestion(letterIndex);
+        if (event.key === 'ArrowLeft' && currentQuizIndex > 0) { currentQuizIndex--; renderQuizPractice(); }
+        if (event.key === 'ArrowRight' && currentQuizIndex < visibleQuizQuestions.length - 1) {
+            currentQuizIndex++;
+            renderQuizPractice();
+        }
+    });
+    document.addEventListener('pointermove', highlightSentenceAtPointer);
+    document.addEventListener('pointerleave', clearSentenceHighlight);
+    document.body.classList.toggle('light', state.theme === 'light');
+    updateSidebarToggle();
+    renderFilters();
+    renderStats();
+    renderModules();
+    renderQuizPractice();
+</script>
+</body>
+</html>
